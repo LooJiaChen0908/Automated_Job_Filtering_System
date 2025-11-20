@@ -1,7 +1,7 @@
 <template>
-    <div>
+    <div class="admin-layout">
         <AdminNavbar />
-        <div class="d-flex">
+        <div class="d-flex layout-body">
             <AdminSidebar />
             
             <div class="main-content flex-fill">
@@ -11,31 +11,47 @@
     </div>
 </template>
 
-
 <script>
 import AdminNavbar from './navbar.vue';
 import AdminSidebar from './sidebar.vue';
   
 export default {
-components: {
-    AdminNavbar,
-    AdminSidebar,
-}
+    components: {
+        AdminNavbar,
+        AdminSidebar,
+    }
 };
 </script>
 
 <style scoped>
+.admin-layout {
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.layout-body {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+}
+
 .sidebar {
     width: 250px;
+    height: calc(100vh - 56px); /* Full height minus navbar */
+    margin-top: 56px;
     position: fixed;
-    height: calc(100% - 56px); /* Account for fixed navbar height */
-    margin-top: 56px; /* Space for navbar */
     padding-top: 1rem;
+    background-color: #f8f9fa;
+    z-index: 1000;
 }
 
 .main-content {
-    margin-left: 250px; /* Sidebar width */
-    margin-top: 56px; /* Space for navbar */
+    margin-left: 250px;
+    margin-top: 56px;
     padding: 2rem;
+    height: calc(100vh - 56px);
+    overflow-y: auto;
 }
 </style>

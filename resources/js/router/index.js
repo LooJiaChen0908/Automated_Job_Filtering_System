@@ -40,11 +40,6 @@ const adminRoutes = [
         name: 'AdminLogin', 
         component: AdminLogin
     },
-    // {
-    //     path: '/api/login',
-    //     name: 'AdminLogin',
-    //     component: AdminLogin
-    // },
     {
         path: '/admin',
         name: 'AdminLayout',
@@ -94,16 +89,6 @@ const adminRoutes = [
             },
         ]
     },
-    // { 
-    //     path: '/test', 
-    //     name: 'test', 
-    //     component: test 
-    // },
-    // { 
-    //     path: '/api/job', 
-    //     name: 'Job', 
-    //     component: Job 
-    // },
 ];
 
 const userRoutes = [
