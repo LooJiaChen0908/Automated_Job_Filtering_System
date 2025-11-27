@@ -72,25 +72,27 @@ export default {
         const inactiveJob = ref(null);
         const countApplication = ref(null);
 
-        onMounted(() => {
-           getData();
-        });
-
         const getData = async () => {
             loading.value = true;
             try {
                 const response = await axios.get('/api/admin/getDashboardData');
+                
                 countCompany.value = response.data.count_company;
                 countJob.value = response.data.count_job;
                 activeJob.value = response.data.active_job;
                 inactiveJob.value = response.data.inactive_job;
                 countApplication.value = response.data.count_application;
+
             } catch (error) {
                 console.error("Failed to fetch data:", error);
             } finally {
                 loading.value = false;
             }
         };
+
+        onMounted(() => {
+           getData();
+        });
 
         const goTo = async (page) => {
             router.push(`/admin/${page}`);

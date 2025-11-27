@@ -31,7 +31,7 @@
                 <span v-if="validationErrors.confirmedPassword" class="text-danger validation-error">{{ validationErrors.confirmedPassword[0] }}</span>
             </div>
             
-            <button class="btn btn-primary btn-register w-100" @click="register">Register</button>
+            <button class="btn btn-primary btn-register w-100" @click="register" :disabled="isSubmit">Register</button>
 
             <p class="mb-0">Already have an account? <router-link to="/user/login" class="text-decoration-none">Login here</router-link></p>
         </div>
@@ -50,6 +50,7 @@ export default {
         const isShowPassword = ref(false);
         const isShowConfirmedPassword = ref(false);
         const router = useRouter();
+        const isSubmit = ref(false);
 
         const form = reactive({
             username: '',
@@ -75,6 +76,10 @@ export default {
                 // });
               
                 // return
+            if (isSubmit.value) return;
+
+            isSubmit.value = true;
+
             try {
                 const response = await axios.post('/api/user/register', form);
                 console.log('Register success:', response.data);
@@ -93,6 +98,8 @@ export default {
             } catch (error) {
                 console.error('Register failed:', error.response?.data || error.message);
                 alert('Registration failed!');
+            } finally {
+                isSubmit.value = false;
             }
         };
 
@@ -108,6 +115,7 @@ export default {
             validationErrors,
             triggerPassword,
             triggerConfirmedPassword,
+            isSubmit
         };
     }
 };

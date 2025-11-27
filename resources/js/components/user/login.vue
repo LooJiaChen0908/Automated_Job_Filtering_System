@@ -16,7 +16,7 @@
                 <span class="input-group-text" @click="triggerPassword"><i :class="isShowPassword ? 'fas fa-eye' : 'fas fa-eye-slash'"></i></span>
                 <span v-if="validationErrors.password" class="text-danger">{{ validationErrors.password[0] }}</span>
             </div>
-            <button class="btn btn-primary w-100" @click="login">Login</button>
+            <button class="btn btn-primary w-100" @click="login" @disabled="isSubmit">Login</button>
         </div>
     </div>
 </template>
@@ -44,6 +44,8 @@ export default {
         const triggerPassword = () => {
             isShowPassword.value = !isShowPassword.value;
         };
+
+        const isSubmit = ref(false);
        
         const login = async () => {
 
@@ -52,6 +54,9 @@ export default {
             // });
 
             // return
+            if (isSubmit.value) return;
+            
+            isSubmit.value = true;
 
             try {
                 const response = await axios.post('/api/user/login', form);
@@ -76,6 +81,8 @@ export default {
             } catch (error) {
                 console.error('Register failed:', error.response?.data || error.message);
                 alert('login failed!');
+            } finally {
+                isSubmit.value = false;
             }
         };
 

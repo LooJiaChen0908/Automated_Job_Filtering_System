@@ -20,53 +20,6 @@ class JobController extends Controller
         ]);
     }
 
-    public function search(Request $request)
-    {
-        
-        // if($input === 'null'){
-        //     return response()->json(['success' => false]);
-        // }
-
-        // $ids = JobPosting::where('title', 'like', '%' . $input . '%')->pluck('id');
-
-        // $c_ids = Company::where('name', 'like', '%' . $input . '%')->pluck('id');
-
-        // $jobs = JobPosting::whereIn('id', $ids)->get();
-
-        $jobs = JobPosting::with('company')
-        // ->where('status',0)
-        ->when($request->title, function($query) use ($request){
-            $query->where('title', 'like', '%' . $request->title . '%');
-        })->when($request->employment_type, function ($query) use ($request){
-            $query->where('employment_type', strtolower($request->employment_type));
-        })->when($request->work_mode, function($query) use ($request){
-            $query->where('work_mode', $request->work_mode);
-        })
-        // ->when($request->salary_min && $request->salary_max, function ($query) use ($request) {
-        //     $query->whereBetween('salary_min', [$request->salary_min, $request->salary_max])
-        //         ->whereBetween('salary_max', [$request->salary_min, $request->salary_max]);
-        // })
-        // ->when($request->salary_min && !$request->salary_max, function ($query) use ($request) {
-        //     $query->where('salary_min', '>=', $request->salary_min);
-        // })
-        // ->when(!$request->salary_min && $request->salary_max, function ($query) use ($request) {
-        //     $query->where('salary_max', '<=', $request->salary_max);
-        // })
-        ->when($request->salary_min, function ($query) use ($request) {
-            $query->where('salary_max', '>=', $request->salary_min);
-        })
-        ->when($request->salary_max, function ($query) use ($request) {
-            $query->where('salary_min', '<=', $request->salary_max);
-        })
-        ->orderBy('created_at','desc')
-        ->get();
-
-        return response()->json([
-            'success' => true,
-            'jobs' => $jobs,
-        ]);
-    }
-
     public function getCompanyName(Request $request)
     {
         $companies = Company::get();
@@ -161,5 +114,51 @@ class JobController extends Controller
         $job->delete();
 
         return response()->json(['success' => true]);
+    }
+
+    public function search(Request $request)
+    {
+        // if($input === 'null'){
+        //     return response()->json(['success' => false]);
+        // }
+
+        // $ids = JobPosting::where('title', 'like', '%' . $input . '%')->pluck('id');
+
+        // $c_ids = Company::where('name', 'like', '%' . $input . '%')->pluck('id');
+
+        // $jobs = JobPosting::whereIn('id', $ids)->get();
+
+        $jobs = JobPosting::with('company')
+        // ->where('status',0)
+        ->when($request->title, function($query) use ($request){
+            $query->where('title', 'like', '%' . $request->title . '%');
+        })->when($request->employment_type, function ($query) use ($request){
+            $query->where('employment_type', strtolower($request->employment_type));
+        })->when($request->work_mode, function($query) use ($request){
+            $query->where('work_mode', $request->work_mode);
+        })
+        // ->when($request->salary_min && $request->salary_max, function ($query) use ($request) {
+        //     $query->whereBetween('salary_min', [$request->salary_min, $request->salary_max])
+        //         ->whereBetween('salary_max', [$request->salary_min, $request->salary_max]);
+        // })
+        // ->when($request->salary_min && !$request->salary_max, function ($query) use ($request) {
+        //     $query->where('salary_min', '>=', $request->salary_min);
+        // })
+        // ->when(!$request->salary_min && $request->salary_max, function ($query) use ($request) {
+        //     $query->where('salary_max', '<=', $request->salary_max);
+        // })
+        ->when($request->salary_min, function ($query) use ($request) {
+            $query->where('salary_max', '>=', $request->salary_min);
+        })
+        ->when($request->salary_max, function ($query) use ($request) {
+            $query->where('salary_min', '<=', $request->salary_max);
+        })
+        ->orderBy('created_at','desc')
+        ->get();
+
+        return response()->json([
+            'success' => true,
+            'jobs' => $jobs,
+        ]);
     }
 }

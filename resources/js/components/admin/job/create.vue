@@ -116,7 +116,6 @@ export default {
             salary_min: '',
             salary_max: '',
             education_level: '',
-            // images: '',
         });
 
         const employment_types = ref([
@@ -155,12 +154,19 @@ export default {
         };
 
         const submit = async () => {
-            if (is_submit.value) return;
+            if (isSubmit.value) return;
 
-            is_submit.value = true;
+            isSubmit.value = true;
 
             try {
                 const response = await axios.post('/api/admin/job/create', form);
+
+                Swal.fire({
+                    title: 'Added successfully',
+                    icon: 'success',
+                    confirmButtonColor: '#007bff',
+                    confirmButtonText: 'Ok'
+                });
 
                 router.push('/admin/job');
 

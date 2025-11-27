@@ -41,8 +41,7 @@
 
         <div class="form-group mb-3">
             City:
-            <!-- <input type="text" class="form-control" v-model="form.city"> -->
-              <v-select
+            <v-select
                 id="city"
                 v-model="form.city"
                 :options="cities"
@@ -51,7 +50,7 @@
                 push-tags       
                 searchable
                 clearable
-                />
+            />
 
         </div>
       
@@ -159,7 +158,6 @@ export default {
             "Labuan"
         ]);
 
-        // Common Malaysian cities (you can add more)
         const cities = ref([
             'Kuala Lumpur',
             'Shah Alam',
@@ -212,13 +210,6 @@ export default {
             // form.value.city = null;
         };
 
-        // Swal.fire({
-        //     title: 'Added successfully',
-        //     icon: 'success',
-        //     confirmButtonColor: '#007bff',
-        //     confirmButtonText: 'Ok'
-        // });
-
         // Handle file upload
         const handleFileUpload = (event) => {
             files.value = Array.from(event.target.files)
@@ -248,12 +239,19 @@ export default {
                     headers: { 'Content-Type': 'mutipart/form-data' }
                 });
 
-                console.log('success:', response.data);
+                Swal.fire({
+                    title: 'Added successfully',
+                    icon: 'success',
+                    confirmButtonColor: '#007bff',
+                    confirmButtonText: 'Ok'
+                });
 
-                router.push('/api/company');
+                // console.log('success:', response.data);
+
+                router.push('/admin/company');
 
             } catch (error) {
-                console.error('Register failed:', error.response?.data || error.message);
+                console.error('Create failed:', error.response?.data || error.message);
                 alert('failed!');
             } finally {
                 is_submit.value = false;

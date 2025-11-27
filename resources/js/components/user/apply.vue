@@ -1,25 +1,42 @@
 <template>
     <div>
         <div class="p-5">
+            <Loading v-if="loading" />
 
-            <h2>Applying for {{job.title}}</h2>
+            <div v-else>
+                <div class="card mb-2">
+                    <div class="card-body">
+                        <div class="text-muted">
+                            Applying for
+                        </div>
 
-            {{job}}
+                        <h2 class="text-capitalize">{{job.title}}</h2>
 
-            Upload resume
+                        <div v-if="job.company" class="text-capitalize mb-2">
+                            {{job.company.name}}
+                        </div>
 
-            <input type="file" class="form-control" @change="handleFileChange($event, 'resume')" accept=".pdf,.doc,.docx">
+                        <div v-if="job.description" class="text-muted">
+                            Description: {{job.description}}
+                        </div>
+                    </div>
+                </div>
 
-            upload cover letter
+                <div class="form-group">
+                    <label class="mb-2">Resume</label>
 
-            <input type="file" class="form-control" @change="handleFileChange($event, 'cover')" accept=".pdf,.doc,.docx">
+                    <input type="file" class="form-control" @change="handleFileChange($event, 'resume')" accept=".pdf,.doc,.docx">
 
+                    <!-- upload cover letter
 
-            <div class="d-flex justify-content-end mt-2">
-                <button class="btn btn-primary" @click="submit">Submit</button>
+                    <input type="file" class="form-control" @change="handleFileChange($event, 'cover')" accept=".pdf,.doc,.docx"> -->
+                </div>
+            
+                <div class="d-flex justify-content-end mt-3">
+                    <button class="btn btn-primary" @click="submit" :disabled="isSubmit">Submit</button>
+                </div>
             </div>
         </div>
-      
     </div>
 </template>
 
@@ -48,12 +65,15 @@ export default {
         const job = ref([]);
 
         const fetchJob = async () => {
+            loading.value = true;
             try {
                 const response = await axios.get(`/api/admin/job/getJob/${props.id}`)
 
                 job.value = response.data.job;
             } catch (error) {
                 console.error("There was an error fetching job:", error);
+            } finally {
+                loading.value = false;
             }
         };
 
@@ -66,9 +86,18 @@ export default {
         }
 
         const submit = async () => {
+            if (isSubmit.value) return;
 
             if (!form.resume) {
-                alert('Please upload your resume before submitting.')
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Please upload your resume before submitting.',
+                    icon: 'error',
+                    confirmButtonColor: '#d33',
+                    confirmButtonText: 'Okay'
+                });
+
+                // alert('Please upload your resume before submitting.')
                 return
             }
 
@@ -79,7 +108,7 @@ export default {
 
             // complete profile first
 
-            
+            isSubmit.value = true;
 
             const formData = new FormData()
             formData.append('job_id', props.id)
@@ -94,12 +123,21 @@ export default {
                 });
 
                 console.log('success:', response.data);
+                
+                Swal.fire({
+                    title: 'Submitted successfully',
+                    icon: 'success',
+                    confirmButtonColor: '#007bff',
+                    confirmButtonText: 'Ok'
+                });
 
-                // router.push({ name: 'Home' });
+                router.push({ name: 'Home' });
 
             } catch (error) {
                 console.error('Apply failed:', error.response?.data || error.message);
                 alert('failed!');
+            } finally {
+                isSubmit.value = false;
             }
         };
 

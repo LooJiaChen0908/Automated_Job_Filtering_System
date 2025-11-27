@@ -10,7 +10,7 @@
 
         <Loading v-if="loading" />
 
-        <div class="card mb-4" v-if="!loading">
+        <div class="card mb-4" v-else>
             <div class="card-header d-flex align-items-center justify-content-between">
                 Advanced Search
                 <i class="fas fa-chevron-down" style="cursor: pointer;"></i>
@@ -192,8 +192,6 @@ export default {
             searched.value = true;
 
             try {
-                // const response = await axios.get(`/api/admin/job/search/${form.title}`);
-
                 const response = await axios.get('/api/admin/job/search', {
                     params: {
                         title: form.title,
@@ -206,11 +204,7 @@ export default {
 
                 jobs.value = response.data.jobs;
 
-                // this.searched_books = response.data.searched_books || [];
-                // this.is_empty_search = false
-
             } catch (error) {
-                // this.is_empty_search = true
                 console.error("Error fetching job", error);
             }
         };

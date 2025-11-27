@@ -10,7 +10,7 @@
 
         <Loading v-if="loading" />
 
-        <div class="card mb-4" v-if="!loading">
+        <div class="card mb-4" v-else>
             <div class="card-header d-flex justify-content-between align-items-center">
                 Advanced Search
                 <i class="fas fa-chevron-down" style="cursor: pointer;"></i>
@@ -304,7 +304,6 @@ export default {
                 companies.value = response.data.companies;
 
             } catch (error) {
-                // this.is_empty_search = true
                 console.error("Error fetching company", error);
             }
         };
