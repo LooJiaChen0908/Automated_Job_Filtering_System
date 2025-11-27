@@ -47,8 +47,12 @@
             <div v-if="applied_jobs.length">
                 Applied Job
 
-                <div class="card" v-for="a_job in applied_jobs" :key="a_job.id">
+                <div class="card mb-2" v-for="a_job in applied_jobs" :key="a_job.id">
                     <div class="card-body">
+                        <div v-if="a_job.confirmed_slot" class="alert alert-success">
+                            Confirmed Interview: {{ $moment(a_job.confirmed_slot).format('YYYY-MM-DD HH:mm A') }}
+                        </div>
+
                         <div class="text-capitalize mb-2">
                             <div class="d-flex align-items-center justify-content-between mb-2">
                                 <b>{{a_job.job.title}}</b>
@@ -68,6 +72,44 @@
                         </div>
                     
                         <span class="text-muted">{{a_job.job.description}}</span>
+
+                        <div v-if="a_job.interview_slots && a_job.interview_slots.length && a_job.interview_status != 2">
+                            <hr>
+
+                            <p>Please choose one of the proposed interview slots:</p>
+
+                            <div class="d-flex gap-2 mb-3">
+                                <button
+                                    v-for="(slot, index) in a_job.interview_slots" 
+                                    :key="index"
+                                    class="btn btn-outline-primary"
+                                    @click="selectSlot(a_job.id, slot)"
+                                    :disabled="isSelect"
+                                >
+                                {{ $moment(slot).format('YYYY-MM-DD HH:mm A') }}
+                                </button>
+                            </div>
+
+                            <p>
+                                Don’t see a suitable time? 
+                                <a href="#" @click.prevent="showSuggestions = !showSuggestions">
+                                    Suggest alternative slots
+                                </a>
+                            </p>
+
+                            <div v-if="showSuggestions">
+                                <div class="mb-3" v-for="(slot, index) in form.slots" :key="index">
+                                    <VueDatePicker
+                                    v-model="form.slots[index]"
+                                    :min-date="new Date()"
+                                    :placeholder="`Select alternative slot ${index + 1}`"
+                                    />
+                                </div>
+                                <div class="text-end">
+                                    <button class="btn btn-primary" @click="submitSlot(a_job.id)" :disabled="isSubmit">Submit</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -100,6 +142,14 @@ export default {
         const countSavedJobs = ref(null);
         const currentTab = ref(null);
 
+        const isSubmit = ref(false);
+        const isSelect = ref(false);
+        const showSuggestions = ref(false);
+
+        const form = ref({
+            slots: [null, null, null]
+        });
+
         const getData = async () => {
             loading.value = true;
             try {
@@ -130,7 +180,65 @@ export default {
         };
 
         const apply = async (job) => {
+            router.push({ name: 'ApplyJob', params: { id: job.id }});
+        };
 
+        const selectSlot = async (application_id, slot) => {
+            if (isSelect.value) return;
+
+            isSelect.value = true;
+
+            try {
+                const response = await axios.post(`/api/user/application/${application_id}/selectSlot`,
+                    { selected_slot: slot },
+                    {
+                        headers: {
+                            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+                        }
+                    }
+                );
+                
+                Swal.fire({
+                    title: 'Slot selected successfully',
+                    icon: 'success',
+                    confirmButtonColor: '#007bff',
+                    confirmButtonText: 'Ok'
+                });
+
+            } catch (error) {
+                console.error("There was an error selecting interview schedule:", error); 
+            } finally {
+                isSelect.value = false;
+            }
+        };
+
+        const submitSlot = async (application_id) => {
+            if (isSubmit.value) return;
+
+            isSubmit.value = true;
+
+            try{
+                const response = await axios.post(`/api/user/application/${application_id}/suggestSlot`,
+                { suggested_slots: form.value.slots.filter(slot => slot !== null) },
+                {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+                    },
+                }
+                );
+
+                Swal.fire({
+                    title: 'Slot submitted successfully',
+                    icon: 'success',
+                    confirmButtonColor: '#007bff',
+                    confirmButtonText: 'Ok'
+                });
+
+            } catch (error) {
+                console.error("There was an error submitting interview schedule:", error); 
+            } finally {
+                isSubmit.value = false;
+            }
         };
       
         return {
@@ -140,6 +248,12 @@ export default {
            countSavedJobs,
            apply,
            currentTab,
+           isSubmit,
+           isSelect,
+           form,
+           selectSlot,
+           submitSlot,
+           showSuggestions
         };
     }
 };

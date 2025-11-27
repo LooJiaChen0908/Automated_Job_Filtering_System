@@ -16,7 +16,27 @@ class Application extends Model
         'status',
         'resume_path',
         'applied_at',
+        'interview_mode',
+        'interview_slots',
+        'selected_slot',
+        'suggested_slots',
+        'confirmed_slot',
+        'interview_status',
     ];
+
+    protected $casts = [
+        'interview_slots' => 'array',
+        'suggested_slots' => 'array',
+    ];
+
+    const STATUS_PENDING = 0;
+    const STATUS_APPROVED = 1;
+    const STATUS_REJECTED = -1;
+    const STATUS_SHORTLISTED = 2;
+
+    const INTERVIEW_PENDING = 0;
+    const INTERVIEW_AWAITING_ADMIN = 1;
+    const INTERVIEW_CONFIRMED = 2;
 
     public function applicant()
     {

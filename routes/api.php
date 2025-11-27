@@ -45,6 +45,10 @@ Route::prefix('admin')->group(function(){
 
     Route::prefix('application')->group(function(){
         Route::get('/', [ApplicationController::class, 'index']);
+        Route::post('/filter', [ApplicationController::class, 'filter']);
+        Route::post('/{id}/updateStatus', [ApplicationController::class, 'updateStatus']);
+        Route::post('/{id}/updateSchedule', [ApplicationController::class, 'updateSchedule']);
+        Route::post('/{id}/confirmSchedule', [ApplicationController::class, 'confirmSchedule']);
     });
 });
 
@@ -55,13 +59,18 @@ Route::prefix('user')->group(function() {
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/logout', [ApplicantController::class, 'logout']);
+
         Route::get('/getProfile', [ApplicantController::class, 'getProfile']);
+        Route::post('/updateProfile', [ApplicantController::class, 'updateProfile']);
         
         Route::post('/applyJob', [ApplyController::class, 'applyJob']);
         Route::get('/getAppliedJob', [ApplyController::class, 'getAppliedJob']);
 
         Route::post('/{id}/saveJob', [SaveController::class, 'saveJob']);
         Route::post('/{id}/unsaveJob', [SaveController::class, 'unsaveJob']);
+
+        Route::post('/application/{id}/selectSlot', [ApplicantController::class, 'selectSlot']);
+        Route::post('/application/{id}/suggestSlot', [ApplicantController::class, 'suggestSlot']); 
     });
 
     Route::get('/getAvailableJobs', [ApplicantController::class, 'getAvailableJobs']);
@@ -71,11 +80,8 @@ Route::prefix('user')->group(function() {
     Route::get('/getJob/{id}', [ApplicantController::class, 'getJob']);
 
     Route::get('/getSavedJob', [SaveController::class, 'getSavedJob']);
-  
-    Route::post('/updateProfile', [ApplicantController::class, 'updateProfile']);
+    
     Route::get('/getSpecialization', [ApplicantController::class, 'getSpecialization']);
-  
-    // getSpecialization
 });
 
 

@@ -11,7 +11,9 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Applicant;
 use App\Models\User;
 use App\Models\JobPosting;
+use App\Models\Application;
 use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class ApplicantController extends Controller
 {
@@ -118,11 +120,15 @@ class ApplicantController extends Controller
         ]);
     }
 
-    public function updateProfile(Request $request) // Applicant $applicant
+    public function updateProfile(Request $request)
     {
-        $applicant = Applicant::find(1); // default
+        if (!$user = Auth::user()) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
 
-        // Auth::user()->applicant();
+        if (!$applicant = $user->applicant) {
+            return response()->json(['message' => 'Applicant profile not found'], 404);
+        }
 
         // add profile image for applicant ?
         $validated = $request->validate([
@@ -151,10 +157,10 @@ class ApplicantController extends Controller
 
             $validated['contact_no'] = $contact;
         }
-             
 
         $birth_date = date('Y-m-d', strtotime("{$request->year}-{$request->month}-{$request->day}"));
         $validated['birth_date'] = $birth_date;
+        $validated['name'] = ucwords(strtolower($validated['name']));
 
         $applicant->update($validated);
        
@@ -227,5 +233,48 @@ class ApplicantController extends Controller
         return response()->json([
             'data' => $specializations
         ]);
+    }
+
+    public function selectSlot(Request $request, $id)
+    {
+        $user = Auth::user();
+
+        if (!$user || !$user->applicant) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $application = Application::where('applicant_id', $user->applicant->id)->findOrFail($id);
+
+        $application->selected_slot = Carbon::parse($request->selected_slot);
+        $application->interview_status = Application::INTERVIEW_AWAITING_ADMIN;
+        $application->save();
+
+        return response()->json(['success' => true]);
+    }
+
+    public function suggestSlot(Request $request, $id)
+    {
+        $user = Auth::user();
+
+        if (!$user || !$user->applicant) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $validated = $request->validate([
+            'suggested_slots' => 'required|array|min:1|max:3', // up to 3 slots
+            'suggested_slots.*' => 'date' // each slot must be a valid date
+        ]);
+
+        $application = Application::where('applicant_id', $user->applicant->id)->findOrFail($id);
+
+        $slots = collect($validated['suggested_slots'])
+        ->map(fn($slot) => Carbon::parse($slot)->setTimezone('Asia/Kuala_Lumpur')->format('Y-m-d H:i:s'))
+        ->toArray();
+
+        $application->suggested_slots = $slots;
+        $application->interview_status = Application::INTERVIEW_AWAITING_ADMIN;
+        $application->save();
+
+        return response()->json(['success' => true]);
     }
 }
