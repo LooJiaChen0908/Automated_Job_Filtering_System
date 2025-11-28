@@ -66,35 +66,38 @@ class ApplyController extends Controller
             return response()->json(['message' => 'Applicant profile not found'], 404);
         }
 
-        if ($request->currentTab == 'applied') {
-            //applied
-        } else {
-            //saved
-        }
-
         $applicant_id = $user->applicant->id; 
+        $tab = $request->tab;
+        $appliedJobs = [];
+        $savedJobs = [];
+        $countSavedJobs = 0;
+        $countAppliedJobs = 0;
 
-        $savedJobs = SavedJob::with('job','job.company')->where('applicant_id', $applicant_id)
-        ->latest()
-        ->get();
+        if ($tab == 'applied') {
+            $appliedJobs = Application::with('job','job.company')->where('applicant_id', $applicant_id)->latest()->get();
 
-        $savedJobs->each(function ($savedJob){
-            $savedJob->job_created_at_human = $savedJob->job->created_at->diffForHumans();
-        });
+            // $appliedJobs->each(function ($appliedJob){
+            //     $appliedJob->job_created_at_human = $appliedJob->job->created_at->diffForHumans();
+            // });
 
-        $appliedJobs = Application::with('job','job.company')->where('applicant_id', $applicant_id)->latest()->get();
+            $countAppliedJobs = $appliedJobs->count();
 
-        // $appliedJobs->each(function ($appliedJob){
-        //     $appliedJob->job_created_at_human = $appliedJob->job->created_at->diffForHumans();
-        // });
+        } else {
+            $savedJobs = SavedJob::with('job','job.company')->where('applicant_id', $applicant_id)->latest()->get();
 
-        $countSavedJobs = $savedJobs->count();
+            $savedJobs->each(function ($savedJob){
+                $savedJob->job_created_at_human = $savedJob->job->created_at->diffForHumans();
+            });
+
+            $countSavedJobs = $savedJobs->count();
+        }
 
         return response()->json([
             'success' => true,
             'savedJobs' => $savedJobs,
             'appliedJobs' => $appliedJobs,
             'countSavedJobs' => $countSavedJobs,
+            'countAppliedJobs' => $countAppliedJobs,
         ]);
     }
 }

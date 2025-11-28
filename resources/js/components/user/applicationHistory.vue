@@ -1,128 +1,142 @@
 <template>
     <div class="p-5"  style="background-color: #bfbbbb;">
-        <h2>Application History</h2>
+        <!-- <h2>Application History</h2> -->
 
-        Saved | Applied
+        <ul class="nav nav-tabs mb-3 custom-tabs">
+            <li class="nav-item">
+                <span class="nav-link" :class="{ active: currentTab === 'saved' }" @click="currentTab = 'saved'">
+                    <i class="far fa-bookmark"></i>&nbsp;Saved Jobs
+                </span>
+            </li>
+            <li class="nav-item ms-4">
+                <span class="nav-link" :class="{ active: currentTab === 'applied' }" @click="currentTab = 'applied'">
+                    <i class="fas fa-briefcase"></i>&nbsp;Applied Jobs
+                </span>
+            </li>
+        </ul>
 
         <Loading v-if="loading" />
 
         <div v-else>
-            <div v-if="saved_jobs.length">
-                <span class="mb-2">Saved Jobs ({{countSavedJobs}} jobs)</span>
-                <!-- <span class="badge badge-pill bg-warning">{{countSavedJobs}}</span> -->
+            <div v-if="currentTab === 'saved'">
+                <div v-if="saved_jobs.length">
+                    <div class="mb-2" v-if="countSavedJobs">{{countSavedJobs}} jobs</div>
 
-                <div v-for="s_job in saved_jobs" :key="s_job.id" class="card mb-2">
-                    <div class="card-body">
-                        <div class="text-capitalize mb-2">
-                            <b>{{s_job.job.title}}</b>
-                            <div>{{s_job.job.company.name}}</div>
+                    <div v-for="s_job in saved_jobs" :key="s_job.id" class="card mb-2">
+                        <div class="card-body">
+                            <div class="text-capitalize mb-2">
+                                <u><b>{{s_job.job.title}}</b></u>
+                                <div>{{s_job.job.company.name}}</div>
+                            </div>
+
+                            <div v-if="s_job.job.company" class="mb-2">
+                                {{s_job.job.company.city}}, {{s_job.job.company.state}}
+                            </div>
+
+                            <div v-if="s_job.job.salary_min" class="mb-2">
+                                RM {{s_job.job.salary_min}} - RM {{s_job.job.salary_max}}
+                            </div>
+
+                            <span class="text-muted mb-2">{{s_job.job.description}}</span>
+
+                            <div class="text-muted mb-2">Posted {{s_job.job_created_at_human}}</div>
+
+                            <div v-if="s_job.job.status != 0">
+                                <button class="btn btn-primary" @click="apply(s_job)">Apply</button>
+                            </div>
                         </div>
-
-                        <div v-if="s_job.job.company" class="mb-2">
-                            {{s_job.job.company.city}}, {{s_job.job.company.state}}
+                        <div class="card-footer text-muted" v-if="s_job.job.status == 0">
+                            This job is no longer active
                         </div>
-
-                        <div v-if="s_job.job.salary_min" class="mb-2">
-                            RM {{s_job.job.salary_min}} - RM {{s_job.job.salary_max}}
-                        </div>
-
-                        <span class="text-muted mb-2">{{s_job.job.description}}</span>
-
-                        <div class="text-muted mb-2">Posted {{s_job.job_created_at_human}}</div>
-
-                        <div v-if="s_job.job.status != 0">
-                            <button class="btn btn-primary" @click="apply(s_job)">Apply</button>
-                        </div>
-                    </div>
-                    <div class="card-footer text-muted" v-if="s_job.job.status == 0">
-                        This job is no longer active
                     </div>
                 </div>
+                <div v-else class="d-flex flex-column align-items-center gap-3">
+                    <i class="fas fa-briefcase" style="font-size: 3rem;"></i>
+                    No saved jobs yet
+                </div>
             </div>
-            <div v-else class="d-flex flex-column">
-                <i class="fas fa-bookmark" style="font-size: 3rem;"></i>
-                No jobs yet
-            </div>
 
-            <div v-if="applied_jobs.length">
-                Applied Job
+            <div v-if="currentTab === 'applied'">
+                <div v-if="applied_jobs.length">
+                    <div class="mb-2" v-if="countAppliedJobs">{{countAppliedJobs}} jobs</div>
 
-                <div class="card mb-2" v-for="a_job in applied_jobs" :key="a_job.id">
-                    <div class="card-body">
-                        <div v-if="a_job.confirmed_slot" class="alert alert-success">
-                            Confirmed Interview: {{ $moment(a_job.confirmed_slot).format('YYYY-MM-DD HH:mm A') }}
-                        </div>
+                    <div class="card mb-2" v-for="a_job in applied_jobs" :key="a_job.id">
+                        <div class="card-body">
+                            <div v-if="a_job.confirmed_slot" class="alert alert-success">
+                                Confirmed Interview: {{ $moment(a_job.confirmed_slot).format('YYYY-MM-DD HH:mm A') }}
+                            </div>
 
-                        <div class="text-capitalize mb-2">
-                            <div class="d-flex align-items-center justify-content-between mb-2">
-                                <b>{{a_job.job.title}}</b>
-                                <span class="badge bg-warning" v-if="a_job.status == 0">Pending</span>
-                                <span class="badge bg-success" v-else="a_job.status == 1">Approved</span>
+                            <div class="text-capitalize mb-2">
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <u><b>{{a_job.job.title}}</b></u>
+                                    <span class="badge bg-warning" v-if="a_job.status == 0">Pending</span>
+                                    <span class="badge bg-success" v-else="a_job.status == 1">Approved</span>
+                                </div>
+                            
+                                <div>{{a_job.job.company.name}}</div>
+                            </div>
+
+                            <div v-if="a_job.job.company" class="mb-2">
+                                {{a_job.job.company.city}}, {{a_job.job.company.state}}
+                            </div>
+
+                            <div v-if="a_job.job.salary_min" class="mb-2">
+                                RM {{a_job.job.salary_min}} - RM {{a_job.job.salary_max}}
                             </div>
                         
-                            <div>{{a_job.job.company.name}}</div>
-                        </div>
+                            <span class="text-muted">{{a_job.job.description}}</span>
 
-                        <div v-if="a_job.job.company" class="mb-2">
-                            {{a_job.job.company.city}}, {{a_job.job.company.state}}
-                        </div>
+                            <div v-if="a_job.interview_slots && a_job.interview_slots.length && a_job.interview_status != 2">
+                                <hr>
 
-                        <div v-if="a_job.job.salary_min" class="mb-2">
-                            RM {{a_job.job.salary_min}} - RM {{a_job.job.salary_max}}
-                        </div>
-                    
-                        <span class="text-muted">{{a_job.job.description}}</span>
+                                <p>Please choose one of the proposed interview slots:</p>
 
-                        <div v-if="a_job.interview_slots && a_job.interview_slots.length && a_job.interview_status != 2">
-                            <hr>
-
-                            <p>Please choose one of the proposed interview slots:</p>
-
-                            <div class="d-flex gap-2 mb-3">
-                                <button
-                                    v-for="(slot, index) in a_job.interview_slots" 
-                                    :key="index"
-                                    class="btn btn-outline-primary"
-                                    @click="selectSlot(a_job.id, slot)"
-                                    :disabled="isSelect"
-                                >
-                                {{ $moment(slot).format('YYYY-MM-DD HH:mm A') }}
-                                </button>
-                            </div>
-
-                            <p>
-                                Don’t see a suitable time? 
-                                <a href="#" @click.prevent="showSuggestions = !showSuggestions">
-                                    Suggest alternative slots
-                                </a>
-                            </p>
-
-                            <div v-if="showSuggestions">
-                                <div class="mb-3" v-for="(slot, index) in form.slots" :key="index">
-                                    <VueDatePicker
-                                    v-model="form.slots[index]"
-                                    :min-date="new Date()"
-                                    :placeholder="`Select alternative slot ${index + 1}`"
-                                    />
+                                <div class="d-flex gap-2 mb-3">
+                                    <button
+                                        v-for="(slot, index) in a_job.interview_slots" 
+                                        :key="index"
+                                        class="btn btn-outline-primary"
+                                        @click="selectSlot(a_job.id, slot)"
+                                        :disabled="isSelect"
+                                    >
+                                    {{ $moment(slot).format('YYYY-MM-DD HH:mm A') }}
+                                    </button>
                                 </div>
-                                <div class="text-end">
-                                    <button class="btn btn-primary" @click="submitSlot(a_job.id)" :disabled="isSubmit">Submit</button>
+
+                                <p>
+                                    Don’t see a suitable time? 
+                                    <a href="#" @click.prevent="showSuggestions = !showSuggestions">
+                                        Suggest alternative slots
+                                    </a>
+                                </p>
+
+                                <div v-if="showSuggestions">
+                                    <div class="mb-3" v-for="(slot, index) in form.slots" :key="index">
+                                        <VueDatePicker
+                                        v-model="form.slots[index]"
+                                        :min-date="new Date()"
+                                        :placeholder="`Select alternative slot ${index + 1}`"
+                                        />
+                                    </div>
+                                    <div class="text-end">
+                                        <button class="btn btn-primary" @click="submitSlot(a_job.id)" :disabled="isSubmit">Submit</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div v-else class="d-flex flex-column">
-                <i class="fas fa-briefcase" style="font-size: 3rem;"></i>
-                No applications yet
+                <div v-else class="d-flex flex-column align-items-center gap-3">
+                    <i class="fas fa-briefcase" style="font-size: 3rem;"></i>
+                    No applications yet
+                </div>
             </div>
         </div>   
     </div>
 </template>
 
 <script>
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import Swal from 'sweetalert2';
@@ -140,7 +154,8 @@ export default {
         const loading = ref(false);
         const search_item = ref(null);
         const countSavedJobs = ref(null);
-        const currentTab = ref(null);
+        const countAppliedJobs = ref(null);
+        const currentTab = ref('saved');
 
         const isSubmit = ref(false);
         const isSelect = ref(false);
@@ -153,9 +168,7 @@ export default {
         const getData = async () => {
             loading.value = true;
             try {
-                // const response = await axios.get(`/api/user/getAppliedJob?currentTab=${currentTab}`);
-              
-                const response = await axios.get(`/api/user/getAppliedJob?currentTab=${currentTab}`, {
+                const response = await axios.get(`/api/user/getAppliedJob?tab=${currentTab.value}`, {
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem('access_token')}`,
                     }
@@ -164,6 +177,7 @@ export default {
                 saved_jobs.value = response.data.savedJobs;
                 applied_jobs.value = response.data.appliedJobs;
                 countSavedJobs.value = response.data.countSavedJobs;
+                countAppliedJobs.value = response.data.countAppliedJobs;
 
             } catch (error) {
                 console.error("Error fetching jobs:", error);
@@ -240,6 +254,10 @@ export default {
                 isSubmit.value = false;
             }
         };
+
+        watch(currentTab, () => {
+            getData();
+        });
       
         return {
            saved_jobs,
@@ -253,12 +271,47 @@ export default {
            form,
            selectSlot,
            submitSlot,
-           showSuggestions
+           showSuggestions,
+           countAppliedJobs
         };
     }
 };
 </script>
 
 <style scoped>
-    
+   .custom-tabs {
+        border-bottom: none; 
+        margin-left: 0;       /* optional: align with parent container */
+        padding-left: 0;      /* optional: align with parent container */
+    }
+
+    .custom-tabs .nav-item {
+        padding: 0; /* removes extra spacing around each tab */
+        margin: 0;  /* optional: remove margin if needed */
+    }
+
+    .custom-tabs .nav-link {
+        position: relative;
+        display: inline-block;
+        padding: 0.5rem 0; /* vertical spacing only */
+        color: #333;
+        background: none;
+        border: none;
+        cursor: pointer;
+    }
+
+    .custom-tabs .nav-link.active {
+        color: #007bff;
+    }
+
+    .custom-tabs .nav-link.active::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 95px; /* shorter underline */
+        height: 2px;
+        background-color: #007bff;
+    }
 </style>
