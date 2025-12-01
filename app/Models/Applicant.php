@@ -21,6 +21,12 @@ class Applicant extends Model
         'specialization',
         'highest_qualification',
         'user_id',
+        'country',
+        'preferred_work_types',
+    ];
+
+    protected $casts = [
+        'preferred_work_types' => 'array',
     ];
 
     public static $specializations = [

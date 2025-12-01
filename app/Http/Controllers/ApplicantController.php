@@ -135,6 +135,7 @@ class ApplicantController extends Controller
             'name' => 'required',
             'gender' => 'required|in:male,female',
             'contact_no' => 'nullable',
+            'country' => "nullable",
             'religion' => 'nullable',
             // 'email' => 'nullable',
             'expected_salary' => 'nullable',
@@ -144,6 +145,8 @@ class ApplicantController extends Controller
             'day' => 'required|integer|min:1|max:31',
             'month' => 'required|integer|min:1|max:12',
             'year' => 'required|integer|min:1900|max:' . date('Y'),
+            'preferred_work_types' => 'nullable|array',
+            'preferred_work_types.*' => 'in:full-time,part-time,temporary,internship', // optional validation
         ]);
 
         if ($request->contact_no) {

@@ -1,15 +1,15 @@
 <template>
     <div class="p-4" style="background-color: #bfbbbb;">
         <h2>Update Profile</h2>
+        
+        <Loading v-if="loading" />
 
-        <div class="row mt-2">
+        <div class="row mt-2" v-else>
             <div class="col-6">
                 <div class="form-group mb-2">
-                    Full name
-                    <input type="text" class="form-control" placeholder="Full Name" v-model="form.name">
+                    <label>Full name</label>
+                    <input type="text" class="form-control name-input" placeholder="Full Name" v-model="form.name">
                 </div>
-
-                {{userProfile}}
 
                 <div class="form-group mb-2">
                     <label>Gender</label>
@@ -20,7 +20,7 @@
                 </div>
 
                 <div class="form-group mb-2">
-                    Contact Number
+                    <label>Contact Number</label>
                     <div class="input-group">
                         <span class="input-group-text" id="salary">+60</span>
                         <input type="text" class="form-control" v-model="form.contact_no">
@@ -28,60 +28,72 @@
                 </div>
 
                 <div class="form-group mb-2">
-                    Salary Expectation
+                    <label>Salary Expectation</label>
                     <div class="input-group">
                         <span class="input-group-text" id="expected_salary">RM</span>
                         <input type="number" class="form-control" v-model="form.expected_salary"  aria-describedby="expected_salary" min="1">
                     </div>
                 </div>
-            </div>
 
-            <div class="col-6">
                 <div class="form-group mb-2">
-                    Birth Date
-                    <div class="d-flex align-items-center gap-2">
-                        <v-select :options="day" placeholder="Day" v-model="form.day" style="width: 30%;"></v-select> /
-                        <v-select :options="month" placeholder="Month" v-model="form.month" label="name" :reduce="month => month.id" style="width: 30%;"></v-select> /
-                        <v-select :options="year" placeholder="Year" v-model="form.year" style="width: 30%;"></v-select>
-                    </div>
-                </div>
-                  
-                <div class="form-group mb-2">
-                    Country
+                    <label>Country</label>
                     <v-select :options="countries" v-model="form.country" label="name" :reduce="country => country.id" placeholder="Select country"></v-select>
                 </div>
 
                 <div class="form-group mb-2">
-                    Religion
+                    <label>Religion</label>
                     <v-select :options="religions" v-model="form.religion" label="name" :reduce="religion => religion.id"placeholder="Select Religion"></v-select>
                 </div>
+            </div>
 
-                <div class="form-group">
-                    Working Experiences
-                    <div class="d-flex align-items-center">
-                        <v-select :options="['No work experience','Month','Year']" placeholder="Select" v-model="form.working_experience" style="width: 30%"></v-select>
-                        <input type="number" class="form-control" placeholder="Years" v-if="form.working_experience == 'Year'">
-                        <input type="number" class="form-control" placeholder="Years" v-else-if="form.working_experience == 'Month'">
+            <div class="col-6">
+                <div class="form-group mb-2">
+                    <label>Birth Date</label>
+                    <div class="d-flex align-items-center gap-2">
+                        <v-select class="w-33" :options="day" placeholder="Day" v-model="form.day"></v-select> /
+                        <v-select class="w-33":options="month" placeholder="Month" v-model="form.month" label="name" :reduce="month => month.id"></v-select> /
+                        <v-select class="w-33" :options="year" placeholder="Year" v-model="form.year"></v-select>
                     </div>
+                </div>
+                
+                <div class="form-group mb-2">
+                    <label>Preferred Work types</label>
+                    <v-select :options="employment_types" v-model="form.preferred_work_types" label="name" :reduce="type => type.id" placeholder="Select employment type" multiple></v-select>
+                </div>
+
+                <div class="form-group mb-2">
+                    <label>Highest education level</label>
+                    <v-select
+                        :options="educationLevels"
+                        v-model="form.highest_qualification"
+                        label="name"
+                        :reduce="option => option.id"
+                        placeholder="Select education level"
+                    />
+                </div>
+
+                <div class="form-group mb-2">
+                    <label>Work Experiences</label>
+                    <v-select
+                        :options="experienceOptions"
+                        v-model="form.work_experience"
+                        label="name"
+                        :reduce="option => option.id"
+                        placeholder="Select work experience"
+                    />
                 </div>
 
                 <div class="form-group">
-                    Specialization
+                    <label>Specialization</label>
                     <v-select :options="specializations" v-model="form.specialization" label="label" :reduce="option => option.value" placeholder="Select Specialization"></v-select>
                 </div>
 
-                
-
-                highest qualification
-
-                resume
+                <!-- resume -->
             </div>
         </div>
 
-        {{form}}
-
         <div class="d-flex justify-content-end">
-            <button class="btn btn-primary" @click="submit">Submit</button>
+            <button class="btn btn-primary" @click="submit" :disabled="isSubmit">Submit</button>
         </div>
     </div>
 </template>
@@ -91,8 +103,12 @@ import { ref, reactive, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import Loading from '@/components/loading.vue';
 
 export default {
+    components: { 
+        Loading,
+    },
     setup() {
         const validationErrors = reactive({});
         const router = useRouter();
@@ -101,6 +117,7 @@ export default {
         const userData = ref(null);
         const userProfile = ref([]);
         const specializations = ref([]);
+        const loading = ref(false);
 
         const form = reactive({
             name: '',
@@ -111,9 +128,12 @@ export default {
             day: '',
             country: '',
             religion: '',
-            working_experience: '',
+            work_experience: '',
             expected_salary: '',
             specialization: '',
+            employment_type: '',
+            highest_qualification: '',
+            preferred_work_types: [],
         });
 
         const day = ref([]);
@@ -142,6 +162,31 @@ export default {
             year.value.push(y);
         }
 
+        const experienceOptions = [
+            { id: 0, name: 'No experience' },
+            { id: 1, name: '1 year' },
+            { id: 2, name: '2 years' },
+            { id: 3, name: '3 years' },
+            { id: 5, name: '5+ years' },
+            { id: 10, name: '10+ years' },
+        ];
+
+        const employment_types = ref([
+            { id: 'full-time', name: 'Full-time' },
+            { id: 'part-time', name: 'Part-time' },
+            { id: 'temporary', name: 'Temporary' },
+            { id: 'internship', name: 'Internship' },
+        ]);
+
+        const educationLevels = [
+            { id: 'none', name: 'None' },
+            { id: 'spm', name: 'SPM / O-Level' },
+            { id: 'diploma', name: 'Diploma / Advanced Diploma' },
+            { id: 'bachelor', name: "Bachelor's Degree" },
+            { id: 'master', name: "Master's Degree" },
+            { id: 'phd', name: 'Doctorate (PhD)' }
+        ];
+
         const religions = [
             { id: 'islam', name: 'Islam' },
             { id: 'buddhism', name: 'Buddhism' },
@@ -164,9 +209,16 @@ export default {
         ]);
       
         const submit = async () => {
+            if (isSubmit.value) return;
+
+            isSubmit.value = true;
+
             try {
-                const response = await axios.post('/api/user/updateProfile', form);
-                console.log('Update success:', response.data);
+                const response = await axios.post('/api/user/updateProfile', form, {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+                    }
+                });
 
                 // Optionally fetch the updated profile again
                 const profileRes = await axios.get('/api/user/getProfile', {
@@ -198,25 +250,47 @@ export default {
                 // router.push({
                 //     name: 'Login',
                 // });
+
+                // router.replace({ name: 'Profile' });
               
             } catch (error) {
                 console.error('Update failed:', error.response?.data || error.message);
                 alert('Update failed!');
+            } finally {
+                isSubmit.value = false;
             }
         };
 
         const getProfile = async () => {
+            loading.value = true;
             try {
-                await axios.get('/api/user/getProfile', {
+                const { data } = await axios.get('/api/user/getProfile', {
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem('access_token')}`,
                     }
                 });
 
-                userProfile.value = response.data.applicant;
+                const applicant = data.applicant;
+
+                Object.keys(form).forEach(key => {
+                    if (applicant[key] !== undefined && applicant[key] !== null) {
+                        form[key] = applicant[key];
+                    }
+                });
+
+                if (applicant.birth_date && applicant.birth_date.includes('-')) {
+                    const [yearStr, monthStr, dayStr] = applicant.birth_date.split('-');
+                    form.year = parseInt(yearStr);
+                    form.month = parseInt(monthStr);
+                    form.day = parseInt(dayStr);
+                }
+
+                userProfile.value = applicant;
 
             } catch (err) {
                 error.value = err.response?.data?.message || 'Error fetching user profile';
+            } finally {
+                loading.value = false;
             }
         };
 
@@ -258,12 +332,22 @@ export default {
             userData,
             userProfile,
             specializations,
+            experienceOptions,
+            employment_types,
+            educationLevels,
+            loading,
         };
     }
 };
 </script>
 
-<style>
-/* Add some global styles here if needed */
+<style scoped>
+    .name-input{
+        text-transform: capitalize;
+    }
+
+    .w-33{
+        width: 33%;
+    }
 </style>
 
