@@ -73,6 +73,7 @@ class CompanyController extends Controller
             'contact_email' => 'nullable',
             'address' => 'nullable',
             'city' => 'nullable',
+            'country' => 'nullable',
             'state' => 'nullable',
             'industry' => 'nullable',
             'images' => 'nullable|array',

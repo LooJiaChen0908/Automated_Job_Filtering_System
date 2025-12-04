@@ -1,8 +1,8 @@
 <template>
-    <div class="d-flex justify-content-center flex-column align-items-center" style="background-color: skyblue;">
-        <h3 class="mb-0">Welcome Admin!</h3>
+    <div class="d-flex justify-content-center flex-column align-items-center" style="padding: 8rem; background-color: skyblue;">
+        <h3>Welcome Admin!</h3>
         
-        <div class="d-flex flex-column gap-4 m-4 rounded-1 p-5" style="background-color: white;">
+        <div class="d-flex flex-column gap-4 rounded-1 p-5" style="background-color: white; width: 35%;">
             <h3 class="text-center mb-0">Register your account</h3>
 
             <div>
@@ -31,10 +31,9 @@
                 <span v-if="validationErrors.confirmedPassword" class="text-danger validation-error">{{ validationErrors.confirmedPassword[0] }}</span>
             </div>
             
-            <button class="btn btn-primary btn-register w-100" @click="register">Register</button>
+            <button class="btn btn-primary btn-register w-100" @click="register" :disabled="isSubmit">Register</button>
 
-            <p class="mb-0">Already have an account? <router-link to="/api/login" class="text-decoration-none">Login here</router-link></p>
-            
+            <p class="mb-0">Already have an account? <router-link to="/" class="text-decoration-none">Login here</router-link></p>
         </div>
     </div>
 </template>
@@ -51,6 +50,7 @@ export default {
         const isShowPassword = ref(false);
         const isShowConfirmedPassword = ref(false);
         const router = useRouter();
+        const isSubmit = ref(false);
 
         const form = reactive({
             username: '',
@@ -71,24 +71,44 @@ export default {
         };
 
         const register = async () => {
-              router.push({
-                    name: 'AdminLogin',
-                });
-                return
+            router.push({
+                name: 'AdminLogin',
+            });
+            return
+
+            if (isSubmit.value) return;
+            
+            isSubmit.value = true;
 
             try {
                 const response = await axios.post('/api/admin/register', form);
-                console.log('Register success:', response.data);
 
-                alert('Registration successful!');
-
+                Swal.fire({
+                    title: 'Registration successfully',
+                    icon: 'success',
+                    confirmButtonColor: '#007bff',
+                    confirmButtonText: 'Ok'
+                });
+                
                 router.push({
                     name: 'AdminLogin',
                 });
               
             } catch (error) {
                 console.error('Register failed:', error.response?.data || error.message);
-                alert('Registration failed!');
+
+                if (error.response?.status === 422) {
+                    Object.assign(validationErrors, error.response.data.errors);
+                } else {
+                    Swal.fire({
+                        title: 'Registration failed!',
+                        text: error.response?.data?.message || 'Something went wrong',
+                        icon: 'error'
+                    });
+                }
+
+            } finally {
+                isSubmit.value = false;
             }
         };
 
@@ -104,6 +124,7 @@ export default {
             validationErrors,
             triggerPassword,
             triggerConfirmedPassword,
+            isSubmit
         };
     }
 };

@@ -40,6 +40,11 @@ const adminRoutes = [
         name: 'AdminLogin', 
         component: AdminLogin
     },
+    { 
+        path: '/register', 
+        name: 'AdminRegister', 
+        component: AdminRegister
+    },
     {
         path: '/admin',
         name: 'AdminLayout',

@@ -1,8 +1,6 @@
 <template>
-    <div>
-         <!-- <h3 class="mb-0">Welcome User!</h3> -->
-        
-        <div class="d-flex flex-column gap-4 m-4 rounded-1 p-5" style="background-color: white;">
+    <div class="d-flex justify-content-center flex-column align-items-center" style="padding: 10rem; background-color: skyblue;">
+        <div class="d-flex flex-column rounded-1 p-5 gap-4" style="background-color: white; width: 35%;">
             <h3 class="text-center mb-0">Register your account</h3>
 
             <div>
@@ -71,11 +69,6 @@ export default {
         };
 
         const register = async () => {
-                // router.push({
-                //     name: 'Login',
-                // });
-              
-                // return
             if (isSubmit.value) return;
 
             isSubmit.value = true;
@@ -97,7 +90,17 @@ export default {
               
             } catch (error) {
                 console.error('Register failed:', error.response?.data || error.message);
-                alert('Registration failed!');
+
+                if (error.response?.status === 422) {
+                    Object.assign(validationErrors, error.response.data.errors);
+                } else {
+                    Swal.fire({
+                        title: 'Registration failed!',
+                        text: error.response?.data?.message || 'Something went wrong',
+                        icon: 'error'
+                    });
+                }
+
             } finally {
                 isSubmit.value = false;
             }

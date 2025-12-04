@@ -5,24 +5,27 @@
         <div class="form-group mb-3">
             Name:
             <input type="text" class="form-control" v-model="form.name">
+            <span v-if="validationErrors.name" class="text-danger">{{ validationErrors.name[0] }}</span>
         </div>
 
         <div class="form-group mb-3">
             Email:
             <input type="text" class="form-control" v-model="form.contact_email">
+            <span v-if="validationErrors.contact_email" class="text-danger">{{ validationErrors.contact_email[0] }}</span>
             <!-- contact_email -->
         </div> 
 
         <div class="form-group mb-3">
             Address:
             <input type="text" class="form-control" v-model="form.address">
+            <span v-if="validationErrors.address" class="text-danger">{{ validationErrors.address[0] }}</span>
             <!-- text area ? -->
         </div>
 
         <div class="form-group mb-3">
-            state:
-            <input type="text" class="form-control" v-model="form.state">
+            State:
             <v-select :options="states" v-model="form.state" placeholder="Select state"></v-select>
+            <span v-if="validationErrors.state" class="text-danger">{{ validationErrors.state[0] }}</span>
             <!-- <v-select
                 :options="states"
                 v-model="form.state"
@@ -51,19 +54,21 @@
                 searchable
                 clearable
             />
+            <span v-if="validationErrors.city" class="text-danger">{{ validationErrors.city[0] }}</span>
 
         </div>
       
         <div class="form-group mb-3">
             Country:
             <v-select :options="countries" v-model="form.country" label="name" :reduce="country => country.id" placeholder="Select country"></v-select>
-            {{form.country}}
+            <span v-if="validationErrors.country" class="text-danger">{{ validationErrors.country[0] }}</span>
         </div>
 
         <div class="form-group mb-3">
             Industry:
             <v-select :options="industries" v-model="form.industry" label="label" :reduce="industry => industry.value" placeholder="Select industry"></v-select>
             <!-- can type then filter by word -->
+            <span v-if="validationErrors.industry" class="text-danger">{{ validationErrors.industry[0] }}</span>
         </div>
 
         add image multiple?
@@ -217,9 +222,9 @@ export default {
         }
 
         const submit = async () => {
-            if (is_submit.value) return;
+            if (isSubmit.value) return;
 
-            is_submit.value = true;
+            isSubmit.value = true;
 
             const formData = new FormData()
             // append text fields
@@ -246,15 +251,26 @@ export default {
                     confirmButtonText: 'Ok'
                 });
 
-                // console.log('success:', response.data);
-
                 router.push('/admin/company');
 
             } catch (error) {
                 console.error('Create failed:', error.response?.data || error.message);
-                alert('failed!');
+                
+                if (error.response?.status === 422) {
+                    // Clear old errors
+                    Object.keys(validationErrors).forEach(key => delete validationErrors[key]);
+                    // Assign new errors
+                    Object.assign(validationErrors, error.response.data.errors);
+                } else {
+                    Swal.fire({
+                        title: 'Failed!',
+                        text: error.response?.data?.message || 'Something went wrong',
+                        icon: 'error'
+                    });
+                }
+
             } finally {
-                is_submit.value = false;
+                isSubmit.value = false;
             }
         };
 

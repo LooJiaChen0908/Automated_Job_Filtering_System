@@ -8,26 +8,31 @@
             <div class="form-group mb-3">
                 Job Title:
                 <input type="text" class="form-control" v-model="form.title">
+                <span v-if="validationErrors.title" class="text-danger">{{ validationErrors.title[0] }}</span>
             </div>
 
             <div class="form-group mb-3">
                 Company:
                 <v-select :options="companies" v-model="form.company_id" label="name" :reduce="company => company.id" placeholder="Select a company"></v-select>
+                <span v-if="validationErrors.company_id" class="text-danger">{{ validationErrors.company_id[0] }}</span>
             </div>
 
             <div class="form-group mb-3">
                 Description:
                 <input type="text" class="form-control" v-model="form.description">
+                <span v-if="validationErrors.description" class="text-danger">{{ validationErrors.description[0] }}</span>
             </div> 
 
             <div class="form-group mb-3">
                 Work Mode:
                 <v-select :options="['On-site','Remote','Hybrid']" v-model="form.work_mode" placeholder="Select work mode"></v-select>
+                <span v-if="validationErrors.work_mode" class="text-danger">{{ validationErrors.work_mode[0] }}</span>
             </div>
 
             <div class="form-group mb-3">
                 Work location:
                 <input type="text" class="form-control" v-model="form.work_location">
+                <span v-if="validationErrors.work_location" class="text-danger">{{ validationErrors.work_location[0] }}</span>
                 <!-- branch sao department ??? -->
             </div> 
 
@@ -40,12 +45,15 @@
                     <span class="input-group-text">RM</span>
                     <input type="number" class="form-control" v-model="form.salary_max" min="1">
                 </div>
+                <span v-if="validationErrors.salary_min" class="text-danger">{{ validationErrors.salary_min[0] }}</span>
+                <span v-if="validationErrors.salary_max" class="text-danger">{{ validationErrors.salary_max[0] }}</span>
             </div>
 
             <div class="form-group mb-3">
                 Employment type:
                 <v-select :options="employment_types" v-model="form.employment_type" label="name" :reduce="type => type.id" placeholder="Select employment type"></v-select>
                 <!-- contact_email -->
+                <span v-if="validationErrors.employment_type" class="text-danger">{{ validationErrors.employment_type[0] }}</span>
             </div> 
             
             <div class="form-group mb-3">
@@ -58,6 +66,7 @@
                     :reduce="option => option.id"
                     placeholder="Select specialization"
                 />
+                <span v-if="validationErrors.specialization" class="text-danger">{{ validationErrors.specialization[0] }}</span>
             </div> 
 
             <div class="form-group mb-3">
@@ -70,10 +79,11 @@
                     :reduce="option => option.id"
                     placeholder="Select required experience years"
                 />
+                <span v-if="validationErrors.required_experience_years" class="text-danger">{{ validationErrors.required_experience_years[0] }}</span>
             </div> 
 
             <div class="form-group mb-3">
-                Education level
+                Required Education level
                 <v-select
                     :options="educationLevels"
                     v-model="form.education_level"
@@ -81,6 +91,7 @@
                     :reduce="option => option.id"
                     placeholder="Select education level"
                 />
+                <span v-if="validationErrors.education_level" class="text-danger">{{ validationErrors.education_level[0] }}</span>
             </div>
 
             <div class="form-group mb-3">
@@ -128,7 +139,7 @@ export default {
             status: '',
             education_level: '',
         });
-        const errors = reactive({});
+        const validationErrors = reactive({});
         const isSubmit = ref(false);
         const router = useRouter();
         const companies = ref([]);
@@ -230,11 +241,19 @@ export default {
                 router.push('/admin/job');
 
             } catch (error) {
-                if (error.response && error.response.status === 422) {
-                    Object.assign(errors, error.response.data.errors);
+                if (error.response?.status === 422) {
+                    // Clear old errors
+                    Object.keys(validationErrors).forEach(key => delete validationErrors[key]);
+                    // Assign new errors
+                    Object.assign(validationErrors, error.response.data.errors);
                 } else {
-                    console.error('Error updating job:', error);
+                    Swal.fire({
+                        title: 'Failed!',
+                        text: error.response?.data?.message || 'Something went wrong',
+                        icon: 'error'
+                    });
                 }
+
             } finally {
                 isSubmit.value = false;
             }
@@ -243,7 +262,7 @@ export default {
         return {
             loading,
             form,
-            errors,
+            validationErrors,
             isSubmit,
             submit,
             employment_types,

@@ -8,19 +8,19 @@
              <div class="form-group mb-3">
                 <label class="mb-3">Company Name</label>
                 <input type="text" class="form-control" v-model="form.name" placeholder="Enter company name"/>
-                <span v-if="errors.name" class="text-danger">{{ errors.name[0] }}</span>
+                <span v-if="validationErrors.name" class="text-danger">{{ validationErrors.name[0] }}</span>
             </div>
 
             <div class="form-group mb-3">
                 <label class="mb-3">Contact Email</label>
                 <input type="text" class="form-control" v-model="form.contact_email" placeholder="Enter contact email"/>
-                <span v-if="errors.contact_email" class="text-danger">{{ errors.contact_email[0] }}</span>
+                <span v-if="validationErrors.contact_email" class="text-danger">{{ validationErrors.contact_email[0] }}</span>
             </div>
 
             <div class="form-group mb-3">
                 State:
-                <!-- <input type="text" class="form-control" v-model="form.state"> -->
                 <v-select :options="states" v-model="form.state" placeholder="Select state"></v-select>
+                <span v-if="validationErrors.state" class="text-danger">{{ validationErrors.state[0] }}</span>
             </div>
 
             <div class="form-group mb-3">
@@ -36,37 +36,35 @@
                     searchable
                     clearable
                     />
-
+                <span v-if="validationErrors.city" class="text-danger">{{ validationErrors.city[0] }}</span>
             </div>
 
             <div class="form-group mb-3">
                 Country:
                 <v-select :options="countries" v-model="form.country" label="name" :reduce="country => country.id" placeholder="Select country"></v-select>
+                <span v-if="validationErrors.country" class="text-danger">{{ validationErrors.country[0] }}</span>
             </div>
 
             <div class="form-group mb-3">
                 Industry:
-            <v-select :options="industries" v-model="form.industry" label="label" :reduce="industry => industry.value" placeholder="Select industry"></v-select>
+                <v-select :options="industries" v-model="form.industry" label="label" :reduce="industry => industry.value" placeholder="Select industry"></v-select>
+                <span v-if="validationErrors.industry" class="text-danger">{{ validationErrors.industry[0] }}</span>
             </div>
 
-            {{form}}
-
             <div class="form-group mb-3">
-                profile image:
-            <input 
-                type="file" 
-                class="form-control" 
-                multiple 
-                @change="handleFileUpload"
-                />
+                Profile image:
+                <input 
+                    type="file" 
+                    class="form-control" 
+                    multiple 
+                    @change="handleFileUpload"
+                    />
             </div>
 
             <div class="form-group text-end">
                 <button class="btn btn-primary" @click="submit" :disabled="isSubmit">Submit</button>
             </div>
-
         </div>
-       
     </div>
 </template>
 
@@ -93,9 +91,11 @@ export default {
             country: '',
             industry: '', 
         });
-        const errors = reactive({});
+        const validationErrors = reactive({});
         const isSubmit = ref(false);
         const router = useRouter();
+        const files = ref([])         // Store the actual file objects
+        const previewUrls = ref([])   // Store preview image URLs
 
         const states = ref([
             "Johor",
@@ -114,6 +114,32 @@ export default {
             "Kuala Lumpur",
             "Putrajaya",
             "Labuan"
+        ]);
+
+        const cities = ref([
+            'Kuala Lumpur',
+            'Shah Alam',
+            'Petaling Jaya',
+            'Subang Jaya',
+            'Johor Bahru',
+            'Iskandar Puteri',
+            'Melaka',
+            'Seremban',
+            'Ipoh',
+            'George Town',
+            'Butterworth',
+            'Kuantan',
+            'Kota Bharu',
+            'Kuala Terengganu',
+            'Alor Setar',
+            'Kangar',
+            'Kota Kinabalu',
+            'Sandakan',
+            'Tawau',
+            'Kuching',
+            'Miri',
+            'Bintulu',
+            'Sibu'
         ]);
 
         const countries = ref([
@@ -158,9 +184,17 @@ export default {
 
         onMounted(fetchCompany);
 
+        // Handle file upload
+        const handleFileUpload = (event) => {
+            files.value = Array.from(event.target.files)
+            previewUrls.value = files.value.map(file => URL.createObjectURL(file))
+        }
+
         const submit = async () => {
             if (isSubmit.value) return;
             isSubmit.value = true;
+
+            // missing upload image function
 
             try {
                 await axios.put(`/api/admin/company/updateCompany/${props.id}`, form);
@@ -175,11 +209,19 @@ export default {
                 router.push('/admin/company');
 
             } catch (error) {
-                if (error.response && error.response.status === 422) {
-                    Object.assign(errors, error.response.data.errors);
+                if (error.response?.status === 422) {
+                    // Clear old errors
+                    Object.keys(validationErrors).forEach(key => delete validationErrors[key]);
+                    // Assign new errors
+                    Object.assign(validationErrors, error.response.data.errors);
                 } else {
-                    console.error('Error updating company:', error);
+                    Swal.fire({
+                        title: 'Failed!',
+                        text: error.response?.data?.message || 'Something went wrong',
+                        icon: 'error'
+                    });
                 }
+
             } finally {
                 isSubmit.value = false;
             }
@@ -188,9 +230,13 @@ export default {
         return {
             loading,
             form,
-            errors,
+            validationErrors,
             isSubmit,
-            submit
+            countries,
+            industries,
+            submit,
+            states,
+            cities,
         };
     }
 };
