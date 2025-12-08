@@ -2,6 +2,10 @@
     <div>
         <div class="d-flex justify-content-between align-items-center mb-2">
             <h2>Application List</h2>
+
+            <router-link to="/admin/interview" class="btn btn-primary">
+                <i class="fas fa-calendar"></i> Interview Slots
+            </router-link>
         </div>
 
         <Loading v-if="loading" />
@@ -33,11 +37,17 @@
                         </label>
                     </div>
                     <div class="form-check">
-                        <!-- <input class="form-check-input" type="checkbox" id="work_type"  v-model="criteria.work_type">
+                        <input class="form-check-input" type="checkbox" id="education_level"  v-model="criteria.education_level">
+                        <label class="form-check-label" for="education_level">
+                            Education level
+                        </label>
+                    </div>
+                    <!-- <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="work_type" v-model="criteria.work_type">
                         <label class="form-check-label" for="work_type">
                             Work Type
-                        </label> -->
-                    </div>
+                        </label>
+                    </div> -->
 
                     <!-- <v-select
                         :options="specializations"
@@ -62,6 +72,27 @@
         </div>
 
         <div v-if="applications.length && !loading">
+            <ul class="nav nav-tabs mb-3 mt-3">
+                <li class="nav-item">
+                    <a class="nav-link" :class="{ active: selectedStatus === null }" @click="selectedStatus = null">All</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" :class="{ active: selectedStatus === 0 }" @click="selectedStatus = 0">
+                        Pending <span class="badge bg-warning" v-if="countPendingApplication">{{countPendingApplication}}</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" :class="{ active: selectedStatus === 1 }" @click="selectedStatus = 1">
+                        Matched <span class="badge bg-info" v-if="countMatchedApplication">{{countMatchedApplication}}</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" :class="{ active: selectedStatus === 2 }" @click="selectedStatus = 2">Shortlisted</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" :class="{ active: selectedStatus === -1 }" @click="selectedStatus = -1">Rejected</a>
+                </li>
+            </ul>
 
             <table class="table table-hover">
                 <thead>
@@ -76,19 +107,24 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="(application, index) in applications" :key="application.id">
+                    <tr v-if="filteredApplications.length === 0">
+                        <td colspan="7" class="text-center text-muted">No applications found for this status</td>
+                    </tr>
+                    <tr v-else v-for="(application, index) in filteredApplications" :key="application.id">
                         <th scope="row">{{ index + 1 }}</th>
                         <td>
-                            <div v-if="application.job">
-                                <span class="text-capitalize">{{ application.job.title }}</span> <span v-if="application.job.company && application.job.company.state">- {{ application.job.company.state }}</span>
+                            <div class="d-flex align-items-center gap-1" v-if="application.job">
+                                <span class="text-capitalize">{{ application.job.title }}</span>
+                                <span class="badge bg-warning" v-if="application.job.specialization_name">{{ application.job.specialization_name }}</span>
+                                <!-- <span v-if="application.job.company && application.job.company.state">- {{ application.job.company.state }}</span> -->
                             </div>
+                         
                             <p>ID: {{application.id}}</p>
                             <!-- {{ application.job.description }} -->
 
                             <p>JOB ID: {{application.job_id}}</p>
                             <p>Work experience: {{application.job.required_experience_years}}</p>
                             <p>Salary min {{application.job.salary_min}}</p>
-                            <p>Specialization {{application.job.specialization}}</p>
                         </td>
                         <td>
                             <div class="d-flex align-items-center gap-1 mb-1">
@@ -109,44 +145,33 @@
                             </div>
                         </td>
                         <td>
-                            <div class="d-flex align-items-center">
-                                <template v-if="application.resume_path.endsWith('.pdf')">
-                                    <a :href="`/storage/${application.resume_path}`" target="_blank" class="btn btn-info btn-sm ms-1">
-                                        <!-- <i class="fas fa-eye">View</i> -->
-                                        View
-                                    </a>
-                                </template>
-                                <!-- <template v-else>
-                                <a :href="`/storage/${application.resume_path}`" download class="btn btn-warning btn-sm ms-1">
-                                    <i class="fas fa-download"></i> Download
+                            <div class="d-flex align-items-center gap-1">
+                                <a class="btn btn-info btn-sm d-flex align-items-center gap-1" v-if="application.resume_path.endsWith('.pdf')" :href="`/storage/${application.resume_path}`" target="_blank">
+                                    <i class="fas fa-search"></i>View
                                 </a>
-                                </template> -->
-                                <a 
-                                    v-if="application.resume_path" 
-                                    :href="`/storage/${application.resume_path}`" 
-                                    download 
-                                    class="btn btn-warning btn-sm ms-1 d-flex align-items-center gap-1"
-                                    target="_blank"
-                                >
-                                    <i class="fas fa-download"></i> Download
+                               
+                                <a class="btn btn-warning btn-sm d-flex align-items-center gap-1" v-if="application.resume_path" :href="`/storage/${application.resume_path}`" target="_blank" download>
+                                    <i class="fas fa-download"></i>Download
                                 </a>
                             </div>
                         </td>
                         <td>
                             <!-- Mode -->
                             <div>
-                                <strong>Mode:</strong> {{ application.interview_mode === 'online' ? 'Online' : 'Face-to-Face' }}
+                                <span v-if="application.interview_mode">
+                                    <strong>Mode:</strong> {{ application.interview_mode === 'online' ? 'Online' : 'Face-to-Face' }}
+                                </span>
                             </div>
 
                             <!-- Proposed Slots -->
                             <div v-if="application.interview_slots && application.interview_slots.length">
                                 <strong>Proposed:</strong>&nbsp;
-                                <span v-for="(slot,index) in application.interview_slots" :key="index">
-                                    {{ $moment(slot).format('YYYY MMM DD HH:mm A') }}
-                                    <span v-if="$moment(slot).format('YYYY-MM-DD HH:mm:ss') === $moment(application.selected_slot).format('YYYY-MM-DD HH:mm:ss')" class="text-success">
-                                        <i class="fas fa-check-circle ms-1"></i>
+                                <span v-for="(slot,index) in application.interview_slots" :key="index" class="me-2">
+                                    <span class="badge bg-info">{{ $moment(slot).format('YYYY MMM DD HH:mm A') }}</span>
+                                    <span v-if="$moment(slot).format('YYYY-MM-DD HH:mm:ss') === $moment(application.selected_slot).format('YYYY-MM-DD HH:mm:ss')" class="text-success ms-1">
+                                        <i class="fas fa-check-circle"></i>
                                     </span>
-                                    <span v-if="index < application.interview_slots.length - 1">, </span>
+                                    <!-- <span v-if="index < application.interview_slots.length - 1">, </span> -->
                                 </span>
                             </div>
 
@@ -154,7 +179,7 @@
                             <div v-if="application.selected_slot">
                                 <strong class="mb-2">Selected:</strong>
                                 <div class="d-flex align-items-center gap-2">
-                                    {{ $moment(application.selected_slot).format('YYYY MMM DD HH:mm A') }}
+                                    <span class="badge bg-info">{{ $moment(application.selected_slot).format('YYYY MMM DD HH:mm A') }}</span>
                                     <button class="btn btn-sm btn-outline-success" v-if="application.interview_status !== 2" @click="confirmSchedule(application.id, application.selected_slot)" :disabled="isConfirm">
                                         <i class="fas fa-check me-1"></i>Confirm
                                     </button>
@@ -165,7 +190,7 @@
                             <div v-if="application.suggested_slots && application.suggested_slots.length">
                                 <strong class="mb-2">Suggested:</strong>
                                 <div class="d-flex align-items-center gap-2 mb-2" v-for="(slot,index) in application.suggested_slots" :key="index">
-                                    {{ $moment(slot).format('YYYY MMM DD HH:mm A') }}
+                                    <span class="badge bg-info">{{ $moment(slot).format('YYYY MMM DD HH:mm A') }}</span>
                                     <button class="btn btn-sm btn-outline-success" v-if="application.interview_status !== 2" @click="confirmSchedule(application.id, slot)" :disabled="isConfirm">
                                         <i class="fas fa-check me-1"></i>Confirm
                                     </button>
@@ -175,13 +200,13 @@
                             <!-- Confirmed Slot -->
                             <div v-if="application.confirmed_slot">
                                 <strong>Confirmed:</strong>&nbsp;
-                                <span class="text-success fw-bold">
+                                <span class="badge bg-success">
                                     {{ $moment(application.confirmed_slot).format('YYYY MMM DD HH:mm A') }}
                                 </span>
                             </div>
 
                             <!-- Interview Status Badge -->
-                            <div>
+                            <div v-if="application.status != 0">
                                 <span v-if="application.interview_status === 0" class="badge bg-warning">Pending</span>
                                 <span v-else-if="application.interview_status === 1" class="badge bg-info">Awaiting Admin</span>
                                 <span v-else-if="application.interview_status === 2" class="badge bg-success">Confirmed</span>
@@ -189,13 +214,15 @@
                         </td>
                         <td>
                             <span class="text-warning" v-if="application.status == 0">Pending</span>
-                            <span class="text-success" v-else-if="application.status == 1">Approved</span>
+                            <span class="text-success" v-else-if="application.status == 1">Matched</span>
                             <span class="text-success" v-else-if="application.status == 2">Shortlisted</span>
                             <span class="text-danger" v-else>Rejected</span>
                         </td>
                         <td>
                             <div class="d-flex align-items-center gap-2">
-                                <button class="btn btn-primary" @click="updateStatus(application, 'matched')" v-if="application.status != 1">Mark as Matched</button>
+                                <!-- need fix -->
+                                <button class="btn btn-primary" @click="updateStatus(application, 'matched')" v-if="!['1','-1'].includes(application.status)">Mark as Matched</button>
+                                <button class="btn btn-danger" @click="reject(application)" :disabled="isReject" v-if="application.status != -1">Reject</button>
                                 <!-- <button class="btn btn-success" @click="editApplication(application)"><i class="fas fa-edit"></i>&nbsp;Edit / Approve</button> -->
                                 <!-- <button class="btn btn-danger" @click="deleteApplication(application)"><i class="fas fa-trash-alt"></i>&nbsp;Delete</button> -->
                                 <!-- <button class="btn btn-info">Notify User</button> -->
@@ -226,39 +253,23 @@
                             <input class="form-check-input" type="radio" id="f2f" value="f2f" v-model="interviewForm.interviewMode">
                             <label class="form-check-label" for="f2f">Face-to-Face</label>
                         </div>
+                        <span v-if="validationErrors.interview_mode" class="text-danger">{{ validationErrors.interview_mode[0] }}</span>
+
                         <hr>
-                        <div v-for="(slot, index) in interviewForm.interviewSlots" :key="index">
-                            <VueDatePicker
-                            v-model="interviewForm.interviewSlots[index]"
-                            :min-date="new Date()"
-                            :placeholder="`Select time slot ${index + 1}`"
-                            />
-                        </div>
-
-                         <!-- Time slot 1:
-                        <VueDatePicker v-model="interviewForm.date1" :min-date="new Date()" placeholder="Select time slot 1"></VueDatePicker>
-                         Time slot 2:
-                        <VueDatePicker v-model="interviewForm.date2" :min-date="new Date()" placeholder="Select time slot 2"></VueDatePicker>
-                         Time slot 3:
-                        <VueDatePicker v-model="interviewForm.date3" :min-date="new Date()" placeholder="Select time slot 3"></VueDatePicker> -->
-
-                        <!-- <VueDatePicker v-model="test" multiDates /> -->
-
-                        <!-- <p>Select a time slot:</p>
-                        <div v-for="day in slots" :key="day.date" class="mb-3">
-                            <strong>Date: {{ day.date }}</strong>
-                            <div class="d-flex gap-2 mt-2">
-                                <button
-                                v-for="time in day.times"
-                                :key="time"
-                                class="btn btn-outline-primary"
-                                :class="{ active: interviewForm.selectedSlot === `${day.date} ${time}` }"
-                                @click="interviewForm.selectedSlot = `${day.date} ${time}`"
-                                >
-                                {{ time }}
-                                </button>
+                        
+                        <div>
+                            <p>Please provide three available interview slots:</p>
+                            <div v-for="(slot, index) in interviewForm.interviewSlots" :key="index" class="mb-3">
+                                <VueDatePicker
+                                    v-model="interviewForm.interviewSlots[index]"
+                                    :min-date="new Date()"
+                                    :placeholder="`Select time slot ${index + 1}`"
+                                />
                             </div>
-                        </div> -->
+                            <span v-if="validationErrors.interview_slots" class="text-danger">
+                                {{ validationErrors.interview_slots[0] }}
+                            </span>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -272,7 +283,7 @@
 </template>
 
 <script>
-import { ref, reactive, onMounted, watch } from 'vue';
+import { ref, reactive, onMounted, watch, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import Swal from 'sweetalert2';
@@ -291,17 +302,21 @@ export default {
         const specializations = ref([]);
         const isSubmit = ref(false);
         const isConfirm = ref(false);
+        const isReject = ref(false);
+        const validationErrors = reactive({});
 
         const filtered = ref(false);
+        const selectedStatus = ref(null);
 
         const criteria = reactive({
             salary: false,
             experience: false,
             specialization: false,
             work_type: false,
-            selected_specialization: null
+            selected_specialization: null,
+            education_level: false,
         });
-
+        
         const interviewForm = ref({
             applicationId: '',
             interviewMode: '',
@@ -330,70 +345,8 @@ export default {
             interviewForm.value.interviewSlots = [null, null, null]
         }
 
-        const slots = ref([])
-
-        const generateSlots = () => {
-            // const today = new Date()
-
-            // for (let i = 0; i < 7; i++) {
-            //     const date = new Date(today)
-            //     date.setDate(today.getDate() + i)
-
-            //     const formattedDate = date.toISOString().split('T')[0] // YYYY-MM-DD
-
-            //     slots.value.push({
-            //         date: formattedDate,
-            //         times: ['10:00 AM', '01:00 PM', '03:00 PM']
-            //     })
-            // }
-
-            const today = new Date()
-            slots.value = [] // reset
-
-            for (let i = 0; i < 7; i++) {
-                const date = new Date(today)
-                date.setDate(today.getDate() + i)
-
-                const formattedDate = date.toISOString().split('T')[0] // YYYY-MM-DD
-
-                // Define your slot times
-                const slotTimes = ['10:00 AM', '01:00 PM', '03:00 PM']
-
-                // If it's today, filter out past times
-                let validTimes = slotTimes
-                if (i === 0) {
-                    const now = new Date()
-
-                    validTimes = slotTimes.filter(time => {
-                        // Convert slot string to a Date object for comparison
-                        const [hours, minutesPart] = time.split(':')
-                        const minutes = minutesPart.slice(0, 2)
-                        const ampm = minutesPart.slice(3)
-
-                        let slotHour = parseInt(hours, 10)
-                        if (ampm === 'PM' && slotHour !== 12) slotHour += 12
-                        if (ampm === 'AM' && slotHour === 12) slotHour = 0
-
-                        const slotDateTime = new Date(date)
-                        slotDateTime.setHours(slotHour, parseInt(minutes), 0, 0)
-
-                        return slotDateTime > now
-                    })
-                }
-
-                // Only push if there are valid times left
-                if (validTimes.length > 0) {
-                    slots.value.push({
-                        date: formattedDate,
-                        times: validTimes
-                    })
-                }
-            }
-        }
-
         onMounted(() => {
             getData();
-            // generateSlots();
         });
 
         const closeModal = () => { // still has problem warning
@@ -425,6 +378,8 @@ export default {
                     interview_slots: interviewSlots,
                 })
 
+                // need block same date & time ???
+
                 closeModal();
                 getData();
                 
@@ -437,6 +392,20 @@ export default {
 
             } catch (error) {
                 console.error("There was an error updating interview schedule:", error); 
+
+                if (error.response?.status === 422) {
+                    // Clear old errors
+                    Object.keys(validationErrors).forEach(key => delete validationErrors[key]);
+                    // Assign new errors
+                    Object.assign(validationErrors, error.response.data.errors);
+                } else {
+                    Swal.fire({
+                        title: 'Update schedule failed!',
+                        text: error.response?.data?.message || 'Something went wrong',
+                        icon: 'error'
+                    });
+                }
+
             } finally {
                 isSubmit.value = false;
             }
@@ -457,6 +426,8 @@ export default {
                     confirmButtonText: 'Ok'
                 });
 
+                getData();
+
             } catch (error) {
                 console.error("There was an error confirming interview schedule:", error); 
             } finally {
@@ -465,12 +436,8 @@ export default {
         };
 
         const deleteApplication = async () => {
-            
+            //
         };
-
-        const editApplication = async () => {
-            
-        };   
 
         const updateStatus = async (application) => {
             try {
@@ -504,10 +471,6 @@ export default {
             window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
         };
 
-        const download = async () => {
-
-        };
-
         const filterApplication = async () => {
             filtered.value = true;
 
@@ -517,12 +480,35 @@ export default {
                     check_experience: criteria.experience,
                     check_specialization: criteria.specialization,
                     check_work_type: criteria.work_type,
+                    check_education: criteria.education_level,
                 });
 
                 applications.value = response.data.filterApplications
 
             } catch (error) {
                 console.error("There was an error filtering applications:", error);
+            }
+        };
+
+        const reject = async (application) => {
+            if (isReject.value) return;
+
+            isReject.value = true;
+
+            try {
+                const response = await axios.post(`/api/admin/application/${application.id}/reject`);
+
+                Swal.fire({
+                    title: 'Updated successfully',
+                    icon: 'success',
+                    confirmButtonColor: '#007bff',
+                    confirmButtonText: 'Ok'
+                });
+
+            } catch (error) {
+                console.error("There was an error rejecting applications:", error);
+            } finally {
+                isReject.value = false;
             }
         };
 
@@ -537,19 +523,33 @@ export default {
             criteria.experience = false;
             criteria.specialization = false;
             criteria.work_type = false;
+            criteria.education_level = false;
             filtered.value = false;
 
             getData();
         };
+        
+        const filteredApplications = computed(() => {
+            if (selectedStatus.value === null) {
+                return applications.value
+            }
+
+            return applications.value.filter(app => app.status === selectedStatus.value)
+        })
+
+        const countByStatus = status => computed(() =>
+            applications.value?.filter(app => app.status === status).length || 0
+        )
+
+        const countPendingApplication = countByStatus(0)
+        const countMatchedApplication = countByStatus(1)
 
         return {
            applications,
            loading,
-           editApplication,
            deleteApplication,
            call,
            sendEmail,
-           download,
            criteria,
            filterApplication,
            reset,
@@ -558,17 +558,35 @@ export default {
            specializations,
            updateStatus,
            updateSchedule,
-           slots,
            interviewForm,
            isSubmit,
            isConfirm,
            openSchedule,
            confirmSchedule,
+           selectedStatus,
+           filteredApplications,
+           reject,
+           isReject,
+           validationErrors,
+           countPendingApplication,
+           countMatchedApplication,
         };
     }
 };
 </script>
 
-<style>
-/* Add some global styles here if needed */
+<style scoped>
+    .nav-link {
+        cursor: pointer;
+    }
+
+    .nav-tabs .nav-link.active {
+        color: #0d6efd;       /* Bootstrap primary blue */
+        background-color: #fff;
+        border-color: #dee2e6 #dee2e6 #fff;
+    }
+
+    .nav-link{
+        color: #000;
+    }
 </style>

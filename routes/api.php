@@ -49,6 +49,8 @@ Route::prefix('admin')->group(function(){
         Route::post('/{id}/updateStatus', [ApplicationController::class, 'updateStatus']);
         Route::post('/{id}/updateSchedule', [ApplicationController::class, 'updateSchedule']);
         Route::post('/{id}/confirmSchedule', [ApplicationController::class, 'confirmSchedule']);
+        Route::post('/{id}/reject', [ApplicationController::class, 'reject']);
+        Route::get('/getConfirmedInterview', [ApplicationController::class, 'getConfirmedInterview']);
     });
 });
 

@@ -20,6 +20,9 @@ import EditJob from '../components/admin/job/edit.vue';
 // application
 import Application from '../components/admin/application/index.vue';
 
+// interview
+import Interview from '../components/admin/interview/index.vue';
+
 import Dashboard from '../components/admin/dashboard.vue';
 
 
@@ -91,6 +94,11 @@ const adminRoutes = [
                 path: 'application',
                 name: 'Application',
                 component: Application
+            },
+            {
+                path: 'interview',
+                name: 'Interview',
+                component: Interview
             },
         ]
     },

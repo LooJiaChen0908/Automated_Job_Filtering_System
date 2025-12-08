@@ -42,7 +42,7 @@
                     <i class="fas fa-briefcase"></i>
                 </div>
                 <div class="card-info">
-                    <h3>Application</h3>
+                    <h3>Applications</h3>
                     <p>{{ countApplication }}</p>
                 </div>
             </div>

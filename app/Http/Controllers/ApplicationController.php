@@ -6,12 +6,12 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Application;
 use App\Models\JobPosting;
-
+use Carbon\Carbon;
 use App\Mail\ApplicationApprovedMail;
 use Illuminate\Support\Facades\Mail;
 
-use Carbon\Carbon;
 use Smalot\PdfParser\Parser;
+use App\Services\ResumeParserService;
 
 class ApplicationController extends Controller
 {
@@ -50,17 +50,55 @@ class ApplicationController extends Controller
 
     public function filter(Request $request)
     {
-        $application_ids = [];
         $is_specify_specialization = false;
-
-        // read text from resume
-        // $resume = $application->resume_path;
 
         $applications = Application::with('job', 'applicant', 'job.company')->get();
 
         $filtered = $applications->filter(function ($a) use ($request) {
             $job = $a->job;
             $applicant = $a->applicant;
+
+            $resumePath = storage_path('app/public/' . $a->resume_path);
+            if (!file_exists($resumePath)) {
+                return false; // skip if resume missing
+            } 
+
+            $parser = new ResumeParserService();
+            $parsed = $parser->parse($resumePath);
+
+            // Experience check (from resume parsing)
+            if ($request->check_experience) {
+                $required = (int) ($job->required_experience_years ?? 0);
+                $actual   = (int) ($parsed['experience_years'] ?? 0);
+
+                if ($actual < $required) {
+                    return false;
+                }
+            }
+
+            // Specialization check (from resume parsing)
+            if ($request->check_specialization) {
+                $jobSpec = strtolower(trim($job->specialization ?? ''));
+                $resumeSpecs = array_map('strtolower', $parsed['specializations'] ?? []);
+
+                if (!in_array($jobSpec, $resumeSpecs)) {
+                    return false;
+                }
+            }
+
+            // Education level check (from resume parsing)
+            if ($request->check_education) {
+               $requiredLevel = strtolower($job->education_level ?? 'none');
+                $resumeLevel   = strtolower($parsed['education_level'] ?? 'none');
+
+                // applicant must have >= required level
+                if ($this->compareEducationLevel($resumeLevel, $requiredLevel) < 0) {
+                    return false;
+                }
+
+            }
+
+            // previous code
 
             if ($request->check_salary) { // between the range salary_min & salary_max
                 $expected = (int) ($applicant->expected_salary ?? 0);
@@ -71,25 +109,23 @@ class ApplicationController extends Controller
                 }
             }
 
-            if ($request->check_experience) {
-                $required = (int) ($job->required_experience_years ?? 0);
-                $actual = (int) ($applicant->work_experience ?? 0);
+            // if ($request->check_experience) {
+            //     $required = (int) ($job->required_experience_years ?? 0);
+            //     $actual = (int) ($applicant->work_experience ?? 0);
 
-                if ($actual < $required) {
-                    return false;
-                }
-            }
+            //     if ($actual < $required) {
+            //         return false;
+            //     }
+            // }
 
-            if ($request->check_specialization) {
-                $jobSpec = strtolower(trim($job->specialization ?? ''));
-                $appSpec = strtolower(trim($applicant->specialization ?? ''));
+            // if ($request->check_specialization) {
+            //     $jobSpec = strtolower(trim($job->specialization ?? ''));
+            //     $appSpec = strtolower(trim($applicant->specialization ?? ''));
 
-                // request->selected_specialization
-
-                if ($jobSpec !== $appSpec) {
-                    return false;
-                }
-            }
+            //     if ($jobSpec !== $appSpec) {
+            //         return false;
+            //     }
+            // }
 
             return true;
         });
@@ -123,34 +159,18 @@ class ApplicationController extends Controller
         //     }
         // }
 
-         // Update application status
-        // $application->status = $matches ? 'matched' : 'rejected';
-        // $application->save();
-
         // Optional: send notification or email
         // Notification::send($applicant->user, new ApplicationFiltered($application));
+    }
 
+    protected function compareEducationLevel(string $a, string $b): int
+    {
+        $order = ['none', 'spm', 'diploma', 'bachelor', 'master', 'phd'];
 
+        $posA = array_search($a, $order);
+        $posB = array_search($b, $order);
 
-        // expected_salary
-        // work_experience
-        // specialization
-        // $applicant = $application->applicant;
-
-        // when request->criteria
-        // where
-
-        //
-
-        // job criteria
-        // applicant criteria
-
-        // notification
-        // email
-
-        // $application->status = '';
-        // $application->save();
-
+        return $posA <=> $posB; // returns -1, 0, or 1
     }
 
     public function updateStatus(Request $request, $id)
@@ -158,7 +178,7 @@ class ApplicationController extends Controller
         $application = Application::findOrFail($id);
         
         if($application->status == 0){
-            $application->status = Application::STATUS_APPROVED;
+            $application->status = Application::STATUS_MATCHED;
             $application->save();
 
             Mail::to($application->applicant->email)->send(new ApplicationApprovedMail($application));
@@ -212,8 +232,41 @@ class ApplicationController extends Controller
 
         $application->confirmed_slot = Carbon::parse($request->confirmed_slot);
         $application->interview_status = Application::INTERVIEW_CONFIRMED;
+        // $application->status = Application::STATUS_SHORTLISTED;
         $application->save();
 
         return response()->json(['success' => true]);
+    }
+
+    public function reject(Request $request, $id)
+    {
+        $application = Application::findOrFail($id);
+
+        if($application->status != 2){
+            $application->status = Application::STATUS_REJECTED;
+            $application->save();
+        }
+
+        return response()->json(['success' => true]);
+    }
+
+    public function getConfirmedInterview(Request $request)
+    {
+        $confirmed_interview = Application::with('applicant')
+        ->whereNotNull('confirmed_slot')
+        ->get()
+        ->map(function($a) {
+            $mode = $a->interview_mode == 'online' ? 'Online': 'Face-to-Face';
+
+            return [
+                'title' => "{$a->applicant->name} ({$mode}) +{$a->applicant->contact_no}",
+                'start' => $a->confirmed_slot->toDateTimeString(),
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'confirmed_interview' => $confirmed_interview,
+        ]);
     }
 }

@@ -26,7 +26,7 @@
                         <div class="card-body">
                             <div class="text-capitalize mb-2">
                                 <u><b>{{s_job.job.title}}</b></u>
-                                <div>{{s_job.job.company.name}}</div>
+                                <div v-if="s_job.job.company">{{s_job.job.company.name}}</div>
                             </div>
 
                             <div v-if="s_job.job.company" class="mb-2">
@@ -66,6 +66,11 @@
                                 Confirmed Interview: {{ $moment(a_job.confirmed_slot).format('YYYY-MM-DD HH:mm A') }}
                             </div>
 
+                            <div v-if="a_job.interview_status == 1" class="alert alert-info">
+                                Your interview slot has been submitted.  
+                                Please wait for confirmation from the administrator.
+                            </div>
+
                             <div class="text-capitalize mb-2">
                                 <div class="d-flex align-items-center justify-content-between mb-2">
                                     <u><b>{{a_job.job.title}}</b></u>
@@ -73,7 +78,7 @@
                                     <span class="badge bg-success" v-else="a_job.status == 1">Approved</span>
                                 </div>
                             
-                                <div>{{a_job.job.company.name}}</div>
+                                <div v-if="a_job.job.company">{{a_job.job.company.name}}</div>
                             </div>
 
                             <div v-if="a_job.job.company" class="mb-2">
@@ -86,40 +91,42 @@
                         
                             <span class="text-muted">{{a_job.job.description}}</span>
 
-                            <div v-if="a_job.interview_slots && a_job.interview_slots.length && a_job.interview_status != 2">
-                                <hr>
+                            <div v-if="a_job.interview_slots && a_job.interview_slots.length">
+                                <div v-if="a_job.interview_status == 0">
+                                    <hr>
 
-                                <p>Please choose one of the proposed interview slots:</p>
+                                    <p>Please choose one of the proposed interview slots:</p>
 
-                                <div class="d-flex gap-2 mb-3">
-                                    <button
-                                        v-for="(slot, index) in a_job.interview_slots" 
-                                        :key="index"
-                                        class="btn btn-outline-primary"
-                                        @click="selectSlot(a_job.id, slot)"
-                                        :disabled="isSelect"
-                                    >
-                                    {{ $moment(slot).format('YYYY-MM-DD HH:mm A') }}
-                                    </button>
-                                </div>
-
-                                <p>
-                                    Don’t see a suitable time? 
-                                    <a href="#" @click.prevent="showSuggestions = !showSuggestions">
-                                        Suggest alternative slots
-                                    </a>
-                                </p>
-
-                                <div v-if="showSuggestions">
-                                    <div class="mb-3" v-for="(slot, index) in form.slots" :key="index">
-                                        <VueDatePicker
-                                        v-model="form.slots[index]"
-                                        :min-date="new Date()"
-                                        :placeholder="`Select alternative slot ${index + 1}`"
-                                        />
+                                    <div class="d-flex gap-2 mb-3">
+                                        <button
+                                            v-for="(slot, index) in a_job.interview_slots" 
+                                            :key="index"
+                                            class="btn btn-outline-primary"
+                                            @click="selectSlot(a_job.id, slot)"
+                                            :disabled="isSelect"
+                                        >
+                                        {{ $moment(slot).format('YYYY-MM-DD HH:mm A') }}
+                                        </button>
                                     </div>
-                                    <div class="text-end">
-                                        <button class="btn btn-primary" @click="submitSlot(a_job.id)" :disabled="isSubmit">Submit</button>
+
+                                    <p>
+                                        Don’t see a suitable time? 
+                                        <a href="#" @click.prevent="showSuggestions = !showSuggestions">
+                                            Suggest alternative slots
+                                        </a>
+                                    </p>
+
+                                    <div v-if="showSuggestions">
+                                        <div class="mb-3" v-for="(slot, index) in form.slots" :key="index">
+                                            <VueDatePicker
+                                            v-model="form.slots[index]"
+                                            :min-date="new Date()"
+                                            :placeholder="`Select alternative slot ${index + 1}`"
+                                            />
+                                        </div>
+                                        <div class="text-end">
+                                            <button class="btn btn-primary" @click="submitSlot(a_job.id)" :disabled="isSubmit">Submit</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -188,11 +195,6 @@ export default {
 
         onMounted(getData);
 
-
-        const triggerTab = async () => {
-
-        };
-
         const apply = async (job) => {
             router.push({ name: 'ApplyJob', params: { id: job.id }});
         };
@@ -218,6 +220,8 @@ export default {
                     confirmButtonColor: '#007bff',
                     confirmButtonText: 'Ok'
                 });
+
+                getData();
 
             } catch (error) {
                 console.error("There was an error selecting interview schedule:", error); 
@@ -247,6 +251,8 @@ export default {
                     confirmButtonColor: '#007bff',
                     confirmButtonText: 'Ok'
                 });
+
+                getData();
 
             } catch (error) {
                 console.error("There was an error submitting interview schedule:", error); 

@@ -38,7 +38,7 @@ export default {
 }
 
 .sidebar {
-    width: 250px;
+    width: 200px;
     height: calc(100vh - 56px); /* Full height minus navbar */
     margin-top: 56px;
     position: fixed;
@@ -48,7 +48,7 @@ export default {
 }
 
 .main-content {
-    margin-left: 250px;
+    margin-left: 200px;
     margin-top: 56px;
     padding: 2rem;
     height: calc(100vh - 56px);

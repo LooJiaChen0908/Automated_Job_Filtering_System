@@ -27,12 +27,16 @@ class Application extends Model
     protected $casts = [
         'interview_slots' => 'array',
         'suggested_slots' => 'array',
+        'confirmed_slot' => 'datetime',
     ];
 
     const STATUS_PENDING = 0;
-    const STATUS_APPROVED = 1;
+    const STATUS_MATCHED = 1;
+    // const STATUS_APPROVED = 1;
     const STATUS_REJECTED = -1;
     const STATUS_SHORTLISTED = 2;
+
+    // pending -> matched -> shortlisted -> interview -> final decision
 
     const INTERVIEW_PENDING = 0;
     const INTERVIEW_AWAITING_ADMIN = 1;

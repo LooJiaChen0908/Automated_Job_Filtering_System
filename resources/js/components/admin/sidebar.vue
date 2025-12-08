@@ -14,6 +14,9 @@
                 <li class="nav-item" :class="{ current: isActive('/admin/application') }">
                     <router-link to="/admin/application" class="nav-link text-dark" active-class="active">Application</router-link>
                 </li>
+                <li class="nav-item" :class="{ current: isActive('/admin/interview') }">
+                    <router-link to="/admin/interview" class="nav-link text-dark" active-class="active">Interview</router-link>
+                </li>
                 <li class="nav-item">
                     <!-- :class="{ current: isActive('/admin/job') }" -->
                     <router-link to="/admin/job" class="nav-link text-dark" active-class="active">Shortlisted</router-link>
@@ -35,7 +38,7 @@ const isActive = (path) => route.path === path
 
 <style scoped>
 .sidebar {
-    width: 250px;
+    width: 200px;
     position: fixed;
     height: calc(100% - 41px); /* Adjust if your navbar is taller */
     margin-top: 41px; /* Push below navbar */
