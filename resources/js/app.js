@@ -11,6 +11,7 @@ import vSelect from 'vue-select';
 import moment from 'moment';
 import { VueDatePicker } from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css'
+import FullCalendar from '@fullcalendar/vue3'
 
 const app = createApp(App);
 
@@ -19,6 +20,7 @@ app.config.globalProperties.$moment = moment;
 
 app.component('v-select', vSelect);
 app.component('VueDatePicker', VueDatePicker);
+app.component('FullCalendar', FullCalendar)
 
 app.use(router);
 app.mount('#app');
