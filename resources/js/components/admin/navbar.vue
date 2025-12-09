@@ -8,9 +8,9 @@
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item me-2">
+                    <!-- <li class="nav-item me-2">
                         <a class="nav-link" href="#">Profile</a>
-                    </li>
+                    </li> -->
                     <li class="nav-item d-flex">
                         <div class="btn-logout">
                             <a class="nav-link d-flex align-items-center gap-2" href="#" @click="logout">

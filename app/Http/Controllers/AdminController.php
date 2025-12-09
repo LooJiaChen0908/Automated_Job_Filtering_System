@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Company;
 use App\Models\JobPosting;
 use App\Models\Application;
+use App\Models\Applicant;
 
 use DB;
 
@@ -109,6 +110,7 @@ class AdminController extends Controller
         $inactive_job = JobPosting::where('status', 0)->count();
 
         $count_application = Application::count();
+        $count_user = Applicant::count();
 
         // $statusCounts = JobPosting::select('status', DB::raw('count(*) as total'))
         // ->groupBy('status')
@@ -121,7 +123,39 @@ class AdminController extends Controller
             'active_job' => $active_job,
             'inactive_job' => $inactive_job,
             'count_application' => $count_application,
+            'count_user' => $count_user,
             // 'status_counts' => $statusCounts
+        ]);
+    }
+
+    public function getUser(Request $request)
+    {
+        $users = Applicant::when($request->name, function($query) use ($request){
+            $query->where('name', 'like', '%' . $request->name . '%');
+        })->when($request->contact_no, function ($query) use ($request){
+            $query->where('contact_no', 'like', '%' . $request->contact_no . '%');
+        })->when($request->email, function($query) use ($request){
+            $query->where('email', 'like', '%' . $request->email . '%');
+        })->when($request->specialization, function($query) use ($request){
+            $query->where('specialization', $request->specialization);
+        })
+        ->orderBy('created_at','desc')
+        ->get()
+        ->append('specialization_name');
+
+        $specializations = collect(JobPosting::$specializations)
+        ->map(function ($value, $key) {
+            return [
+                'value' => $key,
+                'label' => $value,
+            ];
+        })
+        ->values();
+
+        return response()->json([
+            'success' => true,
+            'users' => $users,
+            'specializations' => $specializations
         ]);
     }
 }

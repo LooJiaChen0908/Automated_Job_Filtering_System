@@ -23,6 +23,7 @@ Route::prefix('admin')->group(function(){
     });
 
     Route::get('/getDashboardData', [AdminController::class, 'getDashboardData']);
+    Route::get('/getUser', [AdminController::class, 'getUser']);
 
     Route::prefix('company')->group(function(){
         Route::get('/', [CompanyController::class, 'index']);

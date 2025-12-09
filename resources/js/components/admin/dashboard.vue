@@ -47,6 +47,16 @@
                 </div>
             </div>
 
+            <div class="card" @click="goTo('user')">
+                <div class="card-icon">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="card-info">
+                    <h3>Users</h3>
+                    <p>{{ countUser }}</p>
+                </div>
+            </div>
+            
         </div>
     </div>
 </template>
@@ -71,6 +81,7 @@ export default {
         const activeJob = ref(null);
         const inactiveJob = ref(null);
         const countApplication = ref(null);
+        const countUser = ref(null);
 
         const getData = async () => {
             loading.value = true;
@@ -82,6 +93,7 @@ export default {
                 activeJob.value = response.data.active_job;
                 inactiveJob.value = response.data.inactive_job;
                 countApplication.value = response.data.count_application;
+                countUser.value = response.data.count_user;
 
             } catch (error) {
                 console.error("Failed to fetch data:", error);
@@ -106,6 +118,7 @@ export default {
            inactiveJob,
            countApplication,
            goTo,
+           countUser
         };
     }
 };

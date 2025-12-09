@@ -5,6 +5,9 @@
                 <li class="nav-item" :class="{ current: isActive('/admin') }">
                     <router-link to="/admin" class="nav-link text-dark" active-class="active">Dashboard</router-link>
                 </li>
+                <li class="nav-item" :class="{ current: isActive('/admin/user') }">
+                    <router-link to="/admin/user" class="nav-link text-dark" active-class="active">User</router-link>
+                </li>
                 <li class="nav-item" :class="{ current: isActive('/admin/company') }">
                     <router-link to="/admin/company" class="nav-link text-dark" active-class="active">Company</router-link>
                 </li>
