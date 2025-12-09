@@ -13,21 +13,20 @@
         <div class="card mb-4" v-else>
             <div class="card-header d-flex align-items-center justify-content-between">
                 Advanced Search
-                <i class="fas fa-chevron-down" style="cursor: pointer;"></i>
-                <!-- can add button to close it -->
+                <i :class="showSearch ? 'fas fa-chevron-up' : 'fas fa-chevron-down'" style="cursor: pointer;" @click="showSearch = !showSearch"></i>
             </div>
 
-            <div class="card-body">
+            <div class="card-body" v-if="showSearch">
                 <div class="row">
                     <div class="col-6">
                         <div class="form-group mb-3">
-                            Title:
+                            <label class="form-label">Title</label>
                             <input type="text" class="form-control" v-model="form.title"  @keyup.enter="search">
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="form-group mb-3">
-                            Work Mode:
+                            <label class="form-label">Work Mode</label>
                             <v-select :options="['On-site','Remote','Hybrid']" v-model="form.work_mode" placeholder="Select work mode"></v-select>
                         </div>
                     </div>
@@ -36,7 +35,7 @@
                 <div class="row">
                     <div class="col-6">
                         <div class="form-group mb-3">
-                            Salary Range:
+                            <label class="form-label">Salary Range</label>
                             <div class="d-flex align-items-center">
                                 <span class="input-group-text">RM</span>
                                 <input type="number" class="form-control" v-model="form.salary_min" min="1">
@@ -48,14 +47,14 @@
                     </div>
                     <div class="col-6">
                         <div class="form-group mb-3">
-                            Employment Type:
+                            <label class="form-label">Employment Type</label>
                             <v-select :options="employment_types" label="name" :reduce="type => type.id" v-model="form.employment_type" placeholder="Select work type"></v-select>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="card-footer d-flex justify-content-end gap-2">
+            <div class="card-footer d-flex justify-content-end gap-2" v-if="showSearch">
                 <button class="btn btn-danger" @click="resetForm"><i class="fas fa-eraser"></i></button>
                 <button class="btn btn-primary" @click="search"><i class="fas fa-search"></i></button>
             </div>
@@ -154,6 +153,7 @@ export default {
         });
 
         const searched = ref(false);
+        const showSearch = ref(true);
 
         const employment_types = ref([
             { id: 'full-time', name: 'Full-time' },
@@ -251,6 +251,7 @@ export default {
            employment_types,
            resetForm,
            searched,
+           showSearch
         };
     }
 };

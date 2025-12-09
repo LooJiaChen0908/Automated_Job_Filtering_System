@@ -3,27 +3,27 @@
         <h2>Create Cew Company</h2>
 
         <div class="form-group mb-3">
-            Name:
+            <label class="form-label">Name:</label>
             <input type="text" class="form-control" v-model="form.name">
             <span v-if="validationErrors.name" class="text-danger">{{ validationErrors.name[0] }}</span>
         </div>
 
         <div class="form-group mb-3">
-            Email:
+            <label class="form-label">Email:</label>
             <input type="text" class="form-control" v-model="form.contact_email">
             <span v-if="validationErrors.contact_email" class="text-danger">{{ validationErrors.contact_email[0] }}</span>
             <!-- contact_email -->
         </div> 
 
         <div class="form-group mb-3">
-            Address:
+            <label class="form-label">Address:</label>
             <input type="text" class="form-control" v-model="form.address">
             <span v-if="validationErrors.address" class="text-danger">{{ validationErrors.address[0] }}</span>
             <!-- text area ? -->
         </div>
 
         <div class="form-group mb-3">
-            State:
+            <label class="form-label">State:</label>
             <v-select :options="states" v-model="form.state" placeholder="Select state"></v-select>
             <span v-if="validationErrors.state" class="text-danger">{{ validationErrors.state[0] }}</span>
             <!-- <v-select
@@ -43,7 +43,7 @@
 
 
         <div class="form-group mb-3">
-            City:
+            <label class="form-label">City:</label>
             <v-select
                 id="city"
                 v-model="form.city"
@@ -59,13 +59,13 @@
         </div>
       
         <div class="form-group mb-3">
-            Country:
+            <label class="form-label">Country:</label>
             <v-select :options="countries" v-model="form.country" label="name" :reduce="country => country.id" placeholder="Select country"></v-select>
             <span v-if="validationErrors.country" class="text-danger">{{ validationErrors.country[0] }}</span>
         </div>
 
         <div class="form-group mb-3">
-            Industry:
+            <label class="form-label">Industry:</label>
             <v-select :options="industries" v-model="form.industry" label="label" :reduce="industry => industry.value" placeholder="Select industry"></v-select>
             <!-- can type then filter by word -->
             <span v-if="validationErrors.industry" class="text-danger">{{ validationErrors.industry[0] }}</span>
@@ -74,12 +74,12 @@
         add image multiple?
 
         <div class="form-group mb-3">
-            profile image:
-           <input 
-            type="file" 
-            class="form-control" 
-            multiple 
-            @change="handleFileUpload"
+            <label class="form-label">Profile Image:</label>
+            <input 
+                type="file" 
+                class="form-control" 
+                multiple 
+                @change="handleFileUpload"
             />
         </div>
 

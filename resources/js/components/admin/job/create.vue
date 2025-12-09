@@ -3,13 +3,13 @@
         <h2>Create New Job</h2>
 
         <div class="form-group mb-3">
-            Job Title:
+            <label class="form-label">Job Title:</label>
             <input type="text" class="form-control" v-model="form.title">
             <span v-if="validationErrors.title" class="text-danger">{{ validationErrors.title[0] }}</span>
         </div>
 
         <div class="form-group mb-3">
-            Company:
+            <label class="form-label">Company:</label>
             <v-select :options="companies" v-model="form.company_id" label="name" :reduce="company => company.id" placeholder="Select a company"></v-select>
             <span v-if="validationErrors.company_id" class="text-danger">{{ validationErrors.company_id[0] }}</span>
         </div>
@@ -17,19 +17,19 @@
         <!-- if has company then other auto fill -->
 
         <div class="form-group mb-3">
-            Description:
+            <label class="form-label">Description:</label>
             <input type="text" class="form-control" v-model="form.description">
             <span v-if="validationErrors.description" class="text-danger">{{ validationErrors.description[0] }}</span>
         </div> 
 
         <div class="form-group mb-3">
-            Work Mode:
+            <label class="form-label">Work Mode:</label>
             <v-select :options="['On-site','Remote','Hybrid']" v-model="form.work_mode" placeholder="Select work mode"></v-select>
             <span v-if="validationErrors.work_mode" class="text-danger">{{ validationErrors.work_mode[0] }}</span>
         </div>
 
         <div class="form-group mb-3">
-            Work location:
+            <label class="form-label">Work location:</label>
             <input type="text" class="form-control" v-model="form.work_location">
             <span v-if="validationErrors.work_location" class="text-danger">{{ validationErrors.work_location[0] }}</span>
             <!-- KL BRANCH HQ -->
@@ -37,7 +37,7 @@
         </div> 
 
         <div class="form-group mb-3">
-            Salary Range
+            <label class="form-label">Salary Range</label>
             <div class="d-flex align-items-center">
                 <span class="input-group-text">RM</span>
                 <input type="number" class="form-control" v-model="form.salary_min" min="1">
@@ -50,14 +50,14 @@
         </div>
 
         <div class="form-group mb-3">
-            Employment type:
+            <label class="form-label">Employment type:</label>
             <v-select :options="employment_types" v-model="form.employment_type" label="name" :reduce="type => type.id" placeholder="Select employment type"></v-select>
             <!-- contact_email -->
             <span v-if="validationErrors.employment_type" class="text-danger">{{ validationErrors.employment_type[0] }}</span>
         </div> 
         
          <div class="form-group mb-3">
-            Specialization:
+            <label class="form-label">Specialization:</label>
             <v-select
                 :options="specializations"
                 v-model="form.specialization"
@@ -69,8 +69,7 @@
         </div> 
 
         <div class="form-group mb-3">
-            Required experience years:
-            <input type="number" class="form-control" v-model="form.required_experience_years">
+            <label class="form-label">Required experience years:</label>
             <v-select
                 :options="experienceOptions"
                 v-model="form.required_experience_years"
@@ -82,7 +81,7 @@
         </div>
         
         <div class="form-group mb-3">
-            Required Education level
+            <label class="form-label">Required Education level</label>
             <v-select
                 :options="educationLevels"
                 v-model="form.education_level"

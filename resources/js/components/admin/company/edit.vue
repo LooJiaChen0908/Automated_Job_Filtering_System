@@ -6,26 +6,25 @@
 
         <div v-else>
              <div class="form-group mb-3">
-                <label class="mb-3">Company Name</label>
+                <label class="form-label">Company Name</label>
                 <input type="text" class="form-control" v-model="form.name" placeholder="Enter company name"/>
                 <span v-if="validationErrors.name" class="text-danger">{{ validationErrors.name[0] }}</span>
             </div>
 
             <div class="form-group mb-3">
-                <label class="mb-3">Contact Email</label>
+                <label class="form-label">Contact Email</label>
                 <input type="text" class="form-control" v-model="form.contact_email" placeholder="Enter contact email"/>
                 <span v-if="validationErrors.contact_email" class="text-danger">{{ validationErrors.contact_email[0] }}</span>
             </div>
 
             <div class="form-group mb-3">
-                State:
+                <label class="form-label">State:</label>
                 <v-select :options="states" v-model="form.state" placeholder="Select state"></v-select>
                 <span v-if="validationErrors.state" class="text-danger">{{ validationErrors.state[0] }}</span>
             </div>
 
             <div class="form-group mb-3">
-                City:
-                <!-- <input type="text" class="form-control" v-model="form.city"> -->
+                <label class="form-label">City:</label>
                 <v-select
                     id="city"
                     v-model="form.city"
@@ -40,19 +39,19 @@
             </div>
 
             <div class="form-group mb-3">
-                Country:
+                <label class="form-label">Country:</label>
                 <v-select :options="countries" v-model="form.country" label="name" :reduce="country => country.id" placeholder="Select country"></v-select>
                 <span v-if="validationErrors.country" class="text-danger">{{ validationErrors.country[0] }}</span>
             </div>
 
             <div class="form-group mb-3">
-                Industry:
+                <label class="form-label">Industry:</label>
                 <v-select :options="industries" v-model="form.industry" label="label" :reduce="industry => industry.value" placeholder="Select industry"></v-select>
                 <span v-if="validationErrors.industry" class="text-danger">{{ validationErrors.industry[0] }}</span>
             </div>
 
             <div class="form-group mb-3">
-                Profile image:
+                <label class="form-label">Profile Image:</label>
                 <input 
                     type="file" 
                     class="form-control" 

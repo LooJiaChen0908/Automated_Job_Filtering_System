@@ -4,7 +4,7 @@
             <h2>Application List</h2>
 
             <router-link to="/admin/interview" class="btn btn-primary">
-                <i class="fas fa-calendar"></i> Interview Slots
+                <i class="fas fa-calendar-alt"></i> Interview Slots
             </router-link>
         </div>
 
@@ -13,10 +13,10 @@
         <div class="card mb-2" v-else>
             <div class="card-header d-flex align-items-center justify-content-between">
                 Filter By:
-                <i class="fas fa-chevron-down" style="cursor: pointer;"></i>
+                <i :class="showSearch ? 'fas fa-chevron-up' : 'fas fa-chevron-down'" style="cursor: pointer;" @click="showSearch = !showSearch"></i>
             </div>
 
-            <div class="card-body">
+            <div class="card-body" v-if="showSearch">
                 <div class="d-flex align-items-center gap-2">
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" id="salary" v-model="criteria.salary">
@@ -60,7 +60,7 @@
                 </div>
             </div>
 
-            <div class="card-footer d-flex justify-content-end gap-2">
+            <div class="card-footer d-flex justify-content-end gap-2" v-if="showSearch">
                 <button class="btn btn-secondary" @click="reset">Reset</button>
                 <button class="btn btn-primary d-flex justify-content-end" @click="filterApplication">Submit</button>
             </div>
@@ -83,7 +83,7 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" :class="{ active: selectedStatus === 1 }" @click="selectedStatus = 1">
-                        Matched <span class="badge bg-info" v-if="countMatchedApplication">{{countMatchedApplication}}</span>
+                        Matched <span class="badge bg-warning" v-if="countMatchedApplication">{{countMatchedApplication}}</span>
                     </a>
                 </li>
                 <li class="nav-item">
@@ -100,9 +100,9 @@
                         <th scope="col">#</th>
                         <th scope="col">Job Detail</th>
                         <th scope="col">Applicant Info</th>
-                        <th scope="col">Resume</th>
-                        <th scope="col">Interview Schedule</th>
+                        <th scope="col" v-if="selectedStatus === 0 || selectedStatus === null">Resume</th>
                         <th scope="col">Status</th>
+                        <th scope="col" v-if="selectedStatus !== -1">Interview Schedule</th>
                         <th scope="col">Action</th>
                     </tr>
                 </thead>
@@ -115,26 +115,31 @@
                         <td>
                             <div class="d-flex align-items-center gap-1" v-if="application.job">
                                 <span class="text-capitalize">{{ application.job.title }}</span>
-                                <span class="badge bg-warning" v-if="application.job.specialization_name">{{ application.job.specialization_name }}</span>
+                                <span v-if="application.job.specialization_name">({{ application.job.specialization_name }})</span>
+                                <!-- class="badge bg-secondary"  -->
                                 <!-- <span v-if="application.job.company && application.job.company.state">- {{ application.job.company.state }}</span> -->
                             </div>
+
+                              <!-- {{ application.job.description }} -->
                          
-                            <p>ID: {{application.id}}</p>
-                            <!-- {{ application.job.description }} -->
+                            <!-- <p>A ID: {{application.id}}</p>
+                          
 
                             <p>JOB ID: {{application.job_id}}</p>
                             <p>Work experience: {{application.job.required_experience_years}}</p>
-                            <p>Salary min {{application.job.salary_min}}</p>
+                            <p>Salary min {{application.job.salary_min}}</p> -->
                         </td>
                         <td>
                             <div class="d-flex align-items-center gap-1 mb-1">
-                                {{ application.applicant.email }} <button class="btn btn-secondary btn-sm" @click="sendEmail(application.applicant.email)"><i class="fas fa-envelope"></i></button>
+                                {{ application.applicant.email }}
+                                <!-- <button class="btn btn-secondary btn-sm" @click="sendEmail(application.applicant.email)"><i class="fas fa-envelope"></i></button> -->
                             </div>
 
                             <div class="d-flex align-items-center gap-1">
-                                {{ application.applicant.contact_no }} <button class="btn btn-info btn-sm ms-1" @click="call(application.applicant.contact_no)"><i class="fas fa-phone"></i></button>
+                                +{{ application.applicant.contact_no }}
+                                <!-- <button class="btn btn-secondary btn-sm ms-1" @click="call(application.applicant.contact_no)"><i class="fas fa-phone"></i></button> -->
                             </div>
-                            <div>
+                            <!-- <div>
                                 Expected Salary: {{application.applicant.expected_salary}}
                             </div>
                             <div>
@@ -142,74 +147,17 @@
                             </div>
                             <div>
                                 Specialization: {{application.applicant.specialization}}
-                            </div>
+                            </div> -->
                         </td>
-                        <td>
+                        <td v-if="selectedStatus === 0 || selectedStatus === null">
                             <div class="d-flex align-items-center gap-1">
-                                <a class="btn btn-info btn-sm d-flex align-items-center gap-1" v-if="application.resume_path.endsWith('.pdf')" :href="`/storage/${application.resume_path}`" target="_blank">
+                                <a class="btn btn-secondary btn-sm d-flex align-items-center gap-1" v-if="application.resume_path.endsWith('.pdf')" :href="`/storage/${application.resume_path}`" target="_blank">
                                     <i class="fas fa-search"></i>View
                                 </a>
                                
-                                <a class="btn btn-warning btn-sm d-flex align-items-center gap-1" v-if="application.resume_path" :href="`/storage/${application.resume_path}`" target="_blank" download>
+                                <a class="btn btn-secondary btn-sm d-flex align-items-center gap-1" v-if="application.resume_path" :href="`/storage/${application.resume_path}`" target="_blank" download>
                                     <i class="fas fa-download"></i>Download
                                 </a>
-                            </div>
-                        </td>
-                        <td>
-                            <!-- Mode -->
-                            <div>
-                                <span v-if="application.interview_mode">
-                                    <strong>Mode:</strong> {{ application.interview_mode === 'online' ? 'Online' : 'Face-to-Face' }}
-                                </span>
-                            </div>
-
-                            <!-- Proposed Slots -->
-                            <div v-if="application.interview_slots && application.interview_slots.length">
-                                <strong>Proposed:</strong>&nbsp;
-                                <span v-for="(slot,index) in application.interview_slots" :key="index" class="me-2">
-                                    <span class="badge bg-info">{{ $moment(slot).format('YYYY MMM DD HH:mm A') }}</span>
-                                    <span v-if="$moment(slot).format('YYYY-MM-DD HH:mm:ss') === $moment(application.selected_slot).format('YYYY-MM-DD HH:mm:ss')" class="text-success ms-1">
-                                        <i class="fas fa-check-circle"></i>
-                                    </span>
-                                    <!-- <span v-if="index < application.interview_slots.length - 1">, </span> -->
-                                </span>
-                            </div>
-
-                            <!-- Selected Slot -->
-                            <div v-if="application.selected_slot">
-                                <strong class="mb-2">Selected:</strong>
-                                <div class="d-flex align-items-center gap-2">
-                                    <span class="badge bg-info">{{ $moment(application.selected_slot).format('YYYY MMM DD HH:mm A') }}</span>
-                                    <button class="btn btn-sm btn-outline-success" v-if="application.interview_status !== 2" @click="confirmSchedule(application.id, application.selected_slot)" :disabled="isConfirm">
-                                        <i class="fas fa-check me-1"></i>Confirm
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Suggested Slots -->
-                            <div v-if="application.suggested_slots && application.suggested_slots.length">
-                                <strong class="mb-2">Suggested:</strong>
-                                <div class="d-flex align-items-center gap-2 mb-2" v-for="(slot,index) in application.suggested_slots" :key="index">
-                                    <span class="badge bg-info">{{ $moment(slot).format('YYYY MMM DD HH:mm A') }}</span>
-                                    <button class="btn btn-sm btn-outline-success" v-if="application.interview_status !== 2" @click="confirmSchedule(application.id, slot)" :disabled="isConfirm">
-                                        <i class="fas fa-check me-1"></i>Confirm
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Confirmed Slot -->
-                            <div v-if="application.confirmed_slot">
-                                <strong>Confirmed:</strong>&nbsp;
-                                <span class="badge bg-success">
-                                    {{ $moment(application.confirmed_slot).format('YYYY MMM DD HH:mm A') }}
-                                </span>
-                            </div>
-
-                            <!-- Interview Status Badge -->
-                            <div v-if="application.status != 0">
-                                <span v-if="application.interview_status === 0" class="badge bg-warning">Pending</span>
-                                <span v-else-if="application.interview_status === 1" class="badge bg-info">Awaiting Admin</span>
-                                <span v-else-if="application.interview_status === 2" class="badge bg-success">Confirmed</span>
                             </div>
                         </td>
                         <td>
@@ -218,16 +166,73 @@
                             <span class="text-success" v-else-if="application.status == 2">Shortlisted</span>
                             <span class="text-danger" v-else>Rejected</span>
                         </td>
+                        <td v-if="selectedStatus !== -1">
+                            <!-- Mode -->
+                            <div class="mb-1">
+                                <span v-if="application.interview_mode">
+                                    <strong>Mode:</strong> {{ application.interview_mode === 'online' ? 'Online' : 'Face-to-Face' }}
+                                </span>
+                            </div>
+
+                            <!-- Confirmed Slot -->
+                            <div v-if="application.confirmed_slot">
+                                <strong>Confirmed:</strong>&nbsp;
+                                <span class="fw-bold text-success">
+                                    {{ $moment(application.confirmed_slot).format('YYYY MMM DD HH:mm A') }}
+                                </span>
+                            </div>
+
+                            <div v-else>
+                                <!-- Proposed Slots -->
+                                <div v-if="application.interview_slots && application.interview_slots.length" class="mb-1">
+                                    <strong>Proposed:</strong>&nbsp;
+                                    <span v-for="(slot,index) in application.interview_slots" :key="index" class="me-2">
+                                        <span>{{ $moment(slot).format('YYYY MMM DD HH:mm A') }}</span>
+                                        <!-- <span v-if="$moment(slot).format('YYYY-MM-DD HH:mm:ss') === $moment(application.selected_slot).format('YYYY-MM-DD HH:mm:ss')" class="text-success ms-1">
+                                            <i class="fas fa-check-circle"></i>
+                                        </span> -->
+                                        <span v-if="index < application.interview_slots.length - 1">, </span>
+                                    </span>
+                                </div>
+
+                                <!-- Selected Slot -->
+                                <div v-if="application.selected_slot" class="mb-1">
+                                    <strong class="mb-2">Selected:</strong>&nbsp;
+                                    <div class="d-flex align-items-center gap-2">
+                                        <!-- {{application.selected_slot}} -->
+                                        <span>{{ $moment(application.selected_slot).format('YYYY MMM DD HH:mm A') }}</span>
+                                        <button class="btn btn-sm btn-outline-success" v-if="application.interview_status !== 2" @click="confirmSchedule(application.id, application.selected_slot)" :disabled="isConfirm">
+                                            <i class="fas fa-check me-1"></i>Confirm
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Suggested Slots -->
+                                <div v-if="application.suggested_slots && application.suggested_slots.length" class="mb-1">
+                                    <strong class="mb-2">Suggested:</strong>
+                                    <div class="d-flex align-items-center gap-2 mb-2" v-for="(slot,index) in application.suggested_slots" :key="index">
+                                        <span>{{ $moment(slot).format('YYYY MMM DD HH:mm A') }}</span>
+                                        <button class="btn btn-sm btn-outline-success" v-if="application.interview_status !== 2" @click="confirmSchedule(application.id, slot)" :disabled="isConfirm">
+                                            <i class="fas fa-check me-1"></i>Confirm
+                                        </button>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <!-- Interview Status Badge -->
+                            <!-- <div v-if="application.status != 0">
+                                <span v-if="application.interview_status === 0" class="badge bg-warning">Pending</span>
+                                <span v-else-if="application.interview_status === 1" class="badge bg-info">Awaiting Admin</span>
+                                <span v-else-if="application.interview_status === 2" class="badge bg-success">Confirmed</span>
+                            </div> -->
+                        </td>
                         <td>
                             <div class="d-flex align-items-center gap-2">
-                                <!-- need fix -->
-                                <button class="btn btn-primary" @click="updateStatus(application, 'matched')" v-if="!['1','-1'].includes(application.status)">Mark as Matched</button>
-                                <button class="btn btn-danger" @click="reject(application)" :disabled="isReject" v-if="application.status != -1">Reject</button>
-                                <!-- <button class="btn btn-success" @click="editApplication(application)"><i class="fas fa-edit"></i>&nbsp;Edit / Approve</button> -->
+                                <button class="btn btn-primary" v-if="![1,-1].includes(application.status)" @click="updateStatus(application, 'matched')" :disabled="isMatch"><i class="fas fa-check me-1"></i>Match</button>
                                 <!-- <button class="btn btn-danger" @click="deleteApplication(application)"><i class="fas fa-trash-alt"></i>&nbsp;Delete</button> -->
-                                <!-- <button class="btn btn-info">Notify User</button> -->
-                                <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modal" v-if="!application.interview_mode" @click="openSchedule(application.id)">Schedule Interview</button>
-                                <!-- application detail -->
+                                <button class="btn btn-primary" v-if="!application.interview_mode" data-bs-toggle="modal" data-bs-target="#modal" @click="openSchedule(application.id)"><i class="fas fa-calendar-alt me-1"></i> Schedule Interview</button>
+                                <button class="btn btn-danger" v-if="application.status != -1" @click="reject(application)" :disabled="isReject"><i class="fas fa-times me-1"></i>Reject</button>
                             </div>
                         </td>
                     </tr>
@@ -307,6 +312,9 @@ export default {
 
         const filtered = ref(false);
         const selectedStatus = ref(null);
+
+        const isMatch = ref(false);
+        const showSearch = ref(true);
 
         const criteria = reactive({
             salary: false,
@@ -440,6 +448,10 @@ export default {
         };
 
         const updateStatus = async (application) => {
+            if (isMatch.value) return;
+
+            isMatch.value = true;
+
             try {
                 const response = await axios.post(`/api/admin/application/${application.id}/updateStatus`, {});
 
@@ -450,8 +462,12 @@ export default {
                     confirmButtonText: 'Ok'
                 });
 
+                getData();
+
             } catch (error) {
                 console.error("There was an error updating application:", error);
+            } finally {
+                isMatch.value = false;
             }
         };
 
@@ -570,6 +586,8 @@ export default {
            validationErrors,
            countPendingApplication,
            countMatchedApplication,
+           isMatch,
+           showSearch
         };
     }
 };

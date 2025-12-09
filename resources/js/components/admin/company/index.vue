@@ -13,22 +13,20 @@
         <div class="card mb-4" v-else>
             <div class="card-header d-flex justify-content-between align-items-center">
                 Advanced Search
-                <i class="fas fa-chevron-down" style="cursor: pointer;"></i>
-                <!-- <i class="fas fa-chevron-up" style="cursor: pointer;"></i> -->
-                <!-- click then close it -->
+                <i :class="showSearch ? 'fas fa-chevron-up' : 'fas fa-chevron-down'" style="cursor: pointer;" @click="showSearch = !showSearch"></i>
             </div>
 
-            <div class="card-body">
+            <div class="card-body" v-if="showSearch">
                 <div class="row">
                     <div class="col-6">
                         <div class="form-group mb-3">
-                            Company Name:
+                            <label class="form-label">Company Name</label>
                             <input type="text" class="form-control" v-model="form.name" @keyup.enter="search" placeholder="Enter name">
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="form-group mb-3">
-                            Industry
+                            <label class="form-label">Industry</label>
                             <v-select :options="industries" v-model="form.industry" label="label" :reduce="industry => industry.value" placeholder="Select industry"></v-select>
                         </div>
                     </div>
@@ -36,20 +34,20 @@
                 <div class="row">
                     <div class="col-6">
                         <div class="form-group mb-3">
-                            State:
+                            <label class="form-label">State</label>
                             <v-select :options="states" v-model="form.state" placeholder="Select state"></v-select>
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="form-group mb-3">
-                            Country:
+                            <label class="form-label">Country</label>
                             <v-select :options="countries" v-model="form.country" label="name" :reduce="country => country.id" placeholder="Select country"></v-select>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="card-footer d-flex justify-content-end gap-2">
+            <div class="card-footer d-flex justify-content-end gap-2" v-if="showSearch">
                 <button class="btn btn-danger" @click="resetForm"><i class="fas fa-eraser"></i></button>
                 <button class="btn btn-primary" @click="search"><i class="fas fa-search"></i></button>
             </div>
@@ -77,11 +75,11 @@
                         <th scope="row">{{ index + 1 }}</th>
                         <td>
                             <div class="text-capitalize">
-                                {{ company.name }} <button class="btn btn-secondary btn-sm ms-1" @click="copyToClipboard(company.name, index)"> <i :class="copyIcon(index, 'name')"></i></button>
+                                {{ company.name }} <button class="btn btn-secondary btn-sm ms-1" @click="copyToClipboard(company.name, index, 'name')"> <i :class="copyIcon(index, 'name')"></i></button>
                             </div>
                             <div v-if="company.contact_email">
                                 {{ company.contact_email }}
-                                <button class="btn btn-secondary btn-sm ms-1" @click="copyToClipboard(company.contact_email, index)"> <i :class="copyIcon(index, 'email')"></i></button>
+                                <button class="btn btn-secondary btn-sm ms-1" @click="copyToClipboard(company.contact_email, index, 'email')"> <i :class="copyIcon(index, 'email')"></i></button>
                             </div>
                         </td>
                         <td>
@@ -133,6 +131,7 @@ export default {
         const loading = ref(false);
         const copied = ref({ index: null, field: null });
         const searched = ref(false);
+        const showSearch = ref(true);
 
         const form = reactive({
             name: '',
@@ -323,6 +322,7 @@ export default {
            states,
            countries,
            industries,
+           showSearch
         };
     }
 };
