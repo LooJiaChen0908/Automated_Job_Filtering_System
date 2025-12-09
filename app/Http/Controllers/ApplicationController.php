@@ -260,7 +260,7 @@ class ApplicationController extends Controller
 
             return [
                 'title' => "{$a->applicant->name} ({$mode}) +{$a->applicant->contact_no}",
-                'start' => $a->confirmed_slot->toDateTimeString(),
+                'start' => Carbon::make($a->confirmed_slot)?->toDateTimeString(),
             ];
         });
 

@@ -27,7 +27,6 @@ class Application extends Model
     protected $casts = [
         'interview_slots' => 'array',
         'suggested_slots' => 'array',
-        'confirmed_slot' => 'datetime',
     ];
 
     const STATUS_PENDING = 0;
