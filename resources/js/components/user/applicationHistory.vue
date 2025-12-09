@@ -4,14 +4,14 @@
 
         <ul class="nav nav-tabs mb-3 custom-tabs">
             <li class="nav-item">
-                <span class="nav-link" :class="{ active: currentTab === 'saved' }" @click="currentTab = 'saved'">
+                <router-link :to="{ name: 'ApplicationHistory', query: { type: 'saved' } }" class="nav-link" :class="{ active: currentTab === 'saved' }">
                     <i class="far fa-bookmark"></i>&nbsp;Saved Jobs
-                </span>
+                </router-link>
             </li>
             <li class="nav-item ms-4">
-                <span class="nav-link" :class="{ active: currentTab === 'applied' }" @click="currentTab = 'applied'">
+                <router-link :to="{ name: 'ApplicationHistory', query: { type: 'applied' } }" class="nav-link" :class="{ active: currentTab === 'applied' }">
                     <i class="fas fa-briefcase"></i>&nbsp;Applied Jobs
-                </span>
+                </router-link>
             </li>
         </ul>
 
@@ -144,7 +144,7 @@
 
 <script>
 import { ref, reactive, onMounted, watch } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import Loading from '@/components/loading.vue';
@@ -156,13 +156,14 @@ export default {
     },
     setup() {
         const router = useRouter();
+        const route = useRoute();
         const saved_jobs = ref([]);
         const applied_jobs = ref([]);
         const loading = ref(false);
         const search_item = ref(null);
         const countSavedJobs = ref(null);
         const countAppliedJobs = ref(null);
-        const currentTab = ref('saved');
+        const currentTab = ref(route.query.type || 'saved'); 
 
         const isSubmit = ref(false);
         const isSelect = ref(false);
@@ -261,9 +262,15 @@ export default {
             }
         };
 
-        watch(currentTab, () => {
-            getData();
-        });
+        watch(
+            () => route.query.type,
+            (newType) => {
+                if (newType) {
+                    currentTab.value = newType;
+                    getData();
+                }
+            }
+        );
       
         return {
            saved_jobs,

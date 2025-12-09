@@ -2,37 +2,41 @@
     <div>
         <nav class="navbar navbar-expand-lg" style="background-color: #4d77d9;">
             <div class="container-fluid" style="color: white;">
-                <router-link to="/user/home" class="navbar-brand text-decoration-none text-dark">Automated Job Filtering System</router-link> 
+                <router-link to="/user/home" class="navbar-brand text-decoration-none text-white">Automated Job Filtering System</router-link> 
                 <!-- jom apply -->
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse d-flex justify-content-between" id="navbarNav">
-                    <ul class="navbar-nav" >
+                    <ul class="navbar-nav">
+                        <!-- <li class="nav-item">
+                            <a class="nav-link text-white active" aria-current="page" href="#">Home</a>
+                        </li> -->
+                        <!-- <li class="nav-item">
+                            <router-link to="/user/applicationHistory" class="nav-link text-white">Application History</router-link>
+                        </li> -->
                         <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" href="#">Home</a>
+                            <router-link to="" class="nav-link text-white">Service</router-link>
                         </li>
                         <li class="nav-item">
-                            <router-link to="/user/applicationHistory" class="nav-link text-decoration-none text-dark">Application History</router-link>
+                            <router-link to="" class="nav-link text-white">About Us</router-link>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Contact Us</a>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                More
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="#">Action</a></li>
-                                <li><a class="dropdown-item" href="#">Another action</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="#">Something else here</a></li>
-                            </ul>
+                            <router-link to="" class="nav-link text-white">Contact Us</router-link>
                         </li>
                     </ul>
+                    
                     <div class="d-flex align-items-center gap-2">
-                        <!-- dropdown -->
-                        <router-link to="/user/profile" class="btn btn-light text-capitalize"><i class="fas fa-user"></i> <span v-if="userData">{{userData.name}}</span></router-link>
+                        <div class="btn-group" v-if="userData">
+                            <button type="button" class="btn btn-light dropdown-toggle text-capitalize" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-user"></i>&nbsp;{{userData.name}}
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><router-link to="/user/profile" class="dropdown-item">Profile</router-link></li>
+                                <li><router-link :to="{ path: '/user/applicationHistory', query: { type: 'saved' } }" class="dropdown-item">Saved Job</router-link></li>
+                                <li><router-link :to="{ path: '/user/applicationHistory', query: { type: 'applied' } }" class="dropdown-item">Applied Job</router-link></li>
+                            </ul>
+                        </div>
                         <button class="btn btn-light" @click="logout">Log Out <i class="fas fa-sign-out-alt"></i></button>
                     </div>
                 </div>
@@ -122,15 +126,30 @@ setup(){
 </script>
 
 <style scoped>
-    /*  */
-  .btn-sign-in{
-    background-color: lightgray;
-    border: white;
-    color: black;
-  }
+    .btn-sign-in{
+        background-color: lightgray;
+        border: white;
+        color: black;
+    }
 
+    .container-fluid{
+        color: white;
+    }
 
-  .container-fluid{
-    color: white;
-  }
+    .dropdown-item:active,
+    .dropdown-item:focus {
+        background-color: #4d77d9 !important;
+        color: white !important;              
+    }
+
+    .dropdown-item:hover {
+        background-color: #4d77d9 !important;
+        color: white !important;
+    }
+
+   .nav-link:hover {
+        background-color: rgba(255, 255, 255, 0.1); /* subtle white overlay */
+        color: #ffffff;
+        border-radius: 4px;
+    }
 </style>
