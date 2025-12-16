@@ -42,6 +42,7 @@ return [
 
     'attributes' => [
         'company_id' => 'company',
+        'application_id' => 'application',
         // Add custom attribute names here, e.g. 'email' => 'email address'
     ],
 ];

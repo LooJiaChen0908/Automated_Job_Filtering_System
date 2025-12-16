@@ -61,5 +61,8 @@ class Application extends Model
         return $this->hasMany(Shortlisted::class, 'application_id');
     }
 
+    public function zoomMeetings() {
+        return $this->hasMany(ZoomMeeting::class);
+    }
     // pending approved reject 0 1 -1
 }

@@ -7,6 +7,32 @@
         <Loading v-if="loading" />
 
         <div v-else>
+            <div class="card mb-3">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    Zoom Meeting
+                </div>
+
+                <div class="card-body">
+                    <div class="form-group mb-2">
+                        <label class="form-label">Topic:</label>
+                        <input type="text" class="form-control" v-model="form.topic">
+                        <span v-if="validationErrors.topic" class="text-danger">{{ validationErrors.topic[0] }}</span>
+                    </div>
+                
+                    <div class="form-group">
+                        <label class="form-label">Application:</label>
+                        <v-select :options="applications" v-model="form.application_id" label="label" :reduce="option => option.value" placeholder="Select an application"></v-select>
+                        <span v-if="validationErrors.application_id" class="text-danger">{{ validationErrors.application_id[0] }}</span>
+                    </div>
+                </div>
+                <div class="card-footer d-flex justify-content-end gap-2">
+                    <button class="btn btn-primary" @click="createMeeting" :disabled="isCreate">
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" v-if="isCreate"></span>
+                        Create Meeting
+                    </button>
+                </div>
+            </div>
+            
             <FullCalendar :options="calendarOptions">
                 <template v-slot:eventContent="arg">
                     <div class="slot">
@@ -44,12 +70,57 @@ export default {
         const router = useRouter();
         const loading = ref(false);
         const confirmedInterview = ref([]);
+        const isCreate = ref(false);
+        const applications = ref([]);
+        const validationErrors = reactive({});
+
+        const form = reactive({
+            topic: 'Interview with Candidate',
+            application_id: '',
+        });
+
+        const createMeeting = async () => {
+            isCreate.value = true;
+
+            try {    
+                const response = await axios.post('/api/admin/createMeeting', form).then(res => {
+                    // window.open(res.data.join_url)
+                });
+
+                Swal.fire({
+                    title: 'Meeting Created successfully',
+                    icon: 'success',
+                    confirmButtonColor: '#007bff',
+                    confirmButtonText: 'Ok'
+                });
+
+            } catch (error) {
+                console.error("There was an error creating meetings:", error);
+
+                if (error.response?.status === 422) {
+                    // Clear old errors
+                    Object.keys(validationErrors).forEach(key => delete validationErrors[key]);
+                    // Assign new errors
+                    Object.assign(validationErrors, error.response.data.errors);
+                } else {
+                    Swal.fire({
+                        title: 'Failed!',
+                        text: error.response?.data?.message || 'Something went wrong',
+                        icon: 'error'
+                    });
+                }
+
+            } finally {
+                isCreate.value = false;
+            }
+        };
 
         const getData = async () => {
             loading.value = true;
             try {
                 const response = await axios.get('/api/admin/application/getConfirmedInterview');
                 confirmedInterview.value = response.data.confirmed_interview;
+                applications.value = response.data.applications;
 
             } catch (error) {
                 console.error("There was an error fetching applications:", error);
@@ -85,6 +156,11 @@ export default {
            loading,
            calendarOptions,
            confirmedInterview,
+           createMeeting,
+           form,
+           applications,
+           isCreate,
+           validationErrors
         };
     }
 };

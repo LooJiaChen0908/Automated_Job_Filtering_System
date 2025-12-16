@@ -264,9 +264,23 @@ class ApplicationController extends Controller
             ];
         });
 
+        // filter existing meeting ?
+        $applications = Application::with('applicant')
+        ->whereNotNull('confirmed_slot')
+        ->where('confirmed_slot', '>=', Carbon::now())
+        ->where('interview_mode', 'online')
+        ->get()
+        ->map(function($value, $key){
+            return [
+                'value' => $value->id,
+                'label' => $value->applicant->name. ' - Scheduled At: '.Carbon::parse($value->confirmed_slot)->format('Y-m-d h:i A'),
+            ];
+        });
+
         return response()->json([
             'success' => true,
             'confirmed_interview' => $confirmed_interview,
+            'applications' => $applications,
         ]);
     }
 }

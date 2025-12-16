@@ -10,6 +10,7 @@ use App\Http\Controllers\ApplicantController;
 use App\Http\Controllers\SaveController;
 use App\Http\Controllers\ApplyController;
 use App\Http\Controllers\ApplicationController;
+use App\Http\Controllers\ZoomController;
 
 Route::get('/test', [TestController::class, 'test']);
 
@@ -53,6 +54,8 @@ Route::prefix('admin')->group(function(){
         Route::post('/{id}/reject', [ApplicationController::class, 'reject']);
         Route::get('/getConfirmedInterview', [ApplicationController::class, 'getConfirmedInterview']);
     });
+
+    Route::post('/createMeeting', [ZoomController::class, 'create']);
 });
 
 //user routes
