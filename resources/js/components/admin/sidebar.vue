@@ -20,6 +20,9 @@
                 <li class="nav-item" :class="{ current: isActive('/admin/interview') }">
                     <router-link to="/admin/interview" class="nav-link text-dark" active-class="active">Interview</router-link>
                 </li>
+                <li class="nav-item" :class="{ current: isActive('/admin/meeting') }">
+                    <router-link to="/admin/meeting" class="nav-link text-dark" active-class="active">Meeting</router-link>
+                </li>
                 <li class="nav-item">
                     <!-- :class="{ current: isActive('/admin/job') }" -->
                     <router-link to="/admin/job" class="nav-link text-dark" active-class="active">Shortlisted</router-link>

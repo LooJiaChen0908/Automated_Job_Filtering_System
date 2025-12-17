@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="d-flex justify-content-between align-items-center mb-2">
-            <h2>Users List</h2>
+            <h2>User List</h2>
         </div>
 
         <Loading v-if="loading" />

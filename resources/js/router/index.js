@@ -23,6 +23,9 @@ import Application from '../components/admin/application/index.vue';
 // interview
 import Interview from '../components/admin/interview/index.vue';
 
+// meeting
+import Meeting from '../components/admin/meeting/index.vue';
+
 // User
 import User from '../components/admin/user/index.vue';
 
@@ -108,6 +111,11 @@ const adminRoutes = [
                 name: 'User',
                 component: User
             },
+            {
+                path: 'meeting',
+                name: 'Meeting',
+                component: Meeting
+            },
         ]
     },
 ];
@@ -148,7 +156,7 @@ const userRoutes = [
                 component: ApplyJob,
                 props: true
             },
-             { 
+            { 
                 path: '/user/applicationHistory', 
                 name: 'ApplicationHistory', 
                 component: ApplicationHistory

@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Application;
 use App\Models\JobPosting;
+use App\Models\ZoomMeeting;
 use Carbon\Carbon;
 use App\Mail\ApplicationApprovedMail;
+use App\Mail\InterviewInvitationMail;
 use Illuminate\Support\Facades\Mail;
 
 use Smalot\PdfParser\Parser;
@@ -282,5 +284,29 @@ class ApplicationController extends Controller
             'confirmed_interview' => $confirmed_interview,
             'applications' => $applications,
         ]);
+    }
+
+    public function getMeeting(Request $request)
+    {
+        $meetings = ZoomMeeting::with('application.applicant')
+        ->when($request->zoom_meeting_id, function($query) use ($request){
+            $query->where('zoom_meeting_id', $request->zoom_meeting_id);
+        })
+        ->orderBy('start_time', 'desc')
+        ->get();
+
+        return response()->json([
+            'success' => true,
+            'meetings' => $meetings,
+        ]);
+    }
+
+    public function sendMeetingNotification(Request $request, $id)
+    {
+        $meeting = ZoomMeeting::findOrFail($id);
+
+        Mail::to($meeting->application->applicant->email)->send(new InterviewInvitationMail($meeting));
+
+        return response()->json(['success' => true]);
     }
 }
