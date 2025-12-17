@@ -12,6 +12,7 @@ use App\Models\Company;
 use App\Models\JobPosting;
 use App\Models\Application;
 use App\Models\Applicant;
+use App\Models\ZoomMeeting;
 
 use DB;
 
@@ -111,6 +112,7 @@ class AdminController extends Controller
 
         $count_application = Application::count();
         $count_user = Applicant::count();
+        $count_meeting = ZoomMeeting::count();
 
         // $statusCounts = JobPosting::select('status', DB::raw('count(*) as total'))
         // ->groupBy('status')
@@ -124,6 +126,7 @@ class AdminController extends Controller
             'inactive_job' => $inactive_job,
             'count_application' => $count_application,
             'count_user' => $count_user,
+            'count_meeting' => $count_meeting,
             // 'status_counts' => $statusCounts
         ]);
     }
