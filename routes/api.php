@@ -58,6 +58,7 @@ Route::prefix('admin')->group(function(){
     });
 
     Route::post('/createMeeting', [ZoomController::class, 'create']);
+    Route::post('/manualUpdate', [ZoomController::class, 'manualUpdate']);
 });
 
 //user routes

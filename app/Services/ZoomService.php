@@ -6,6 +6,8 @@ use Illuminate\Support\Facades\Http;
 
 class ZoomService
 {   
+    protected $baseUrl = "https://api.zoom.us/v2";
+
     public function getAccessToken()
     {
         $response = Http::asForm()
@@ -30,7 +32,7 @@ class ZoomService
         $token = $this->getAccessToken();
 
         $response = Http::withToken($token)
-        ->post('https://api.zoom.us/v2/users/me/meetings', [
+        ->post("{$this->baseUrl}/users/me/meetings", [
             'topic' => $data['topic'],
             'type' => $data['type'] ?? 2, // default to scheduled meeting
             'start_time' => $data['start_time'],
@@ -40,6 +42,19 @@ class ZoomService
 
         if ($response->failed()) {
             throw new \Exception('Failed to create Zoom meeting: ' . $response->body());
+        }
+
+        return $response;
+    }
+
+    public function getMeeting($meetingId)
+    {
+        $token = $this->getAccessToken();
+
+        $response = Http::withToken($token)->get("{$this->baseUrl}/meetings/{$meetingId}");
+
+        if ($response->failed()) {
+            throw new \Exception('Failed to fetch Zoom meeting: ' . $response->body());
         }
 
         return $response;

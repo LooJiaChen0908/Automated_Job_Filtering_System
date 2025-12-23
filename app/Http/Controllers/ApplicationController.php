@@ -216,6 +216,7 @@ class ApplicationController extends Controller
         ->map(fn($slot) => Carbon::parse($slot)->setTimezone('Asia/Kuala_Lumpur')->format('Y-m-d H:i:s'))
         ->toArray();
 
+        $application->status = Application::STATUS_SHORTLISTED;
         $application->interview_slots = $slots;
         $application->save();
 
@@ -230,11 +231,13 @@ class ApplicationController extends Controller
             'confirmed_slot' => 'required'
         ]);
 
-        // check status
+        if ($application->status == Application::STATUS_INTERVIEW_CONFIRMED) {
+            return response()->json(['success' => false, 'message' => 'Application is already confirmed']);
+        }
 
+        $application->status = Application::STATUS_INTERVIEW_CONFIRMED;
         $application->confirmed_slot = Carbon::parse($request->confirmed_slot);
         $application->interview_status = Application::INTERVIEW_CONFIRMED;
-        // $application->status = Application::STATUS_SHORTLISTED;
         $application->save();
 
         return response()->json(['success' => true]);
@@ -244,7 +247,7 @@ class ApplicationController extends Controller
     {
         $application = Application::findOrFail($id);
 
-        if($application->status != 2){
+        if($application->status != Application::STATUS_REJECTED){
             $application->status = Application::STATUS_REJECTED;
             $application->save();
         }
@@ -266,11 +269,14 @@ class ApplicationController extends Controller
             ];
         });
 
-        // filter existing meeting ?
+        // Get all application IDs that already have meetings
+        $meeting_ids = ZoomMeeting::pluck('application_id')->toArray();
+      
         $applications = Application::with('applicant')
         ->whereNotNull('confirmed_slot')
         ->where('confirmed_slot', '>=', Carbon::now())
         ->where('interview_mode', 'online')
+        ->whereNotIn('id', $meeting_ids)
         ->get()
         ->map(function($value, $key){
             return [

@@ -80,6 +80,8 @@ export default {
         });
 
         const createMeeting = async () => {
+            if (isCreate.value) return;
+
             isCreate.value = true;
 
             try {    

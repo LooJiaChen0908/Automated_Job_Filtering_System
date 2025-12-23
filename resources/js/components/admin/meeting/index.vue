@@ -2,6 +2,11 @@
     <div>
         <div class="d-flex justify-content-between align-items-center mb-2">
             <h2>Zoom Meeting List</h2>
+
+            <button class="btn btn-primary" @click="updateStatus" :disabled="isUpdating">
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" v-if="isUpdating"></span>
+                <i class="fas fa-sync" v-else></i>&nbsp;Update Status
+            </button>
         </div>
 
         <Loading v-if="loading" />
@@ -42,6 +47,7 @@
                         <th scope="col">Zoom Meeting ID</th>
                         <th scope="col">Applicant Detail</th>
                         <th scope="col">Join URL</th>
+                        <th scope="col">Status</th>
                         <th scope="col">Action</th>
                     </tr>
                 </thead>
@@ -74,9 +80,20 @@
                             </div>
                         </td>
                         <td>
+                            <div class="text-capitalize">
+                                {{meeting.status}}
+                            </div>
+                        </td>
+                        <td>
                             <div class="d-flex align-items-center gap-2 w-100">
-                                <button class="btn btn-primary" @click="startMeeting(meeting.start_url)">Start</button>
-                                <button class="btn btn-primary" @click="sendNoti(meeting)" :disabled="isSending">Send Notification</button>
+                                <button class="btn btn-primary d-flex align-items-center" @click="startMeeting(meeting.start_url)">
+                                    <i class="fas fa-video me-1"></i>Start
+                                </button>
+
+                                <button class="btn btn-primary d-flex align-items-center" @click="sendNoti(meeting)" :disabled="loadingId === meeting.id">
+                                    <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true" v-if="loadingId === meeting.id"></span>
+                                    <i class="fas fa-bell me-1" v-else></i>Notify
+                                </button>
                             </div>
                         </td>
                     </tr>
@@ -106,7 +123,8 @@ export default {
         const copied = ref({ index: null, field: null });
         const searched = ref(false);
         const showSearch = ref(true);
-        const isSending = ref(false);
+        const isUpdating = ref(false);
+        const loadingId = ref(null);
 
         const form = reactive({
             zoom_meeting_id: '',
@@ -152,7 +170,9 @@ export default {
         };
 
         const sendNoti = async (meeting) => {
-            isSending.value = true;
+            if (loadingId.value) return;
+
+            loadingId.value = meeting.id;
 
             try {
                 const response = await axios.post(`/api/admin/application/${meeting.id}/sendMeetingNotification`);
@@ -167,7 +187,29 @@ export default {
             } catch (error) {
                 console.error("Error send notifications:", error);
             } finally {
-                isSending.value = false;
+                loadingId.value = null;
+            }
+        };
+
+        const updateStatus = async() => {
+            if (isUpdating.value) return;
+
+            isUpdating.value = true;
+
+            try {
+                const response = await axios.post(`/api/admin/manualUpdate`, {});
+
+                Swal.fire({
+                    title: 'Updated successful',
+                    icon: 'success',
+                    confirmButtonColor: '#007bff',
+                    confirmButtonText: 'Ok'
+                });
+
+            } catch (error) {
+                console.error("Error updating meetings:", error);
+            } finally {
+                isUpdating.value = false;
             }
         };
 
@@ -187,10 +229,12 @@ export default {
            showSearch,
            startMeeting,
            sendNoti,
-           isSending,
            form,
            resetForm,
-           search
+           search,
+           updateStatus,
+           isUpdating,
+           loadingId
         };
     }
 };

@@ -90,6 +90,9 @@
                     <a class="nav-link" :class="{ active: selectedStatus === 2 }" @click="selectedStatus = 2">Shortlisted</a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link" :class="{ active: selectedStatus === 3 }" @click="selectedStatus = 3">Interview Confirmed</a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" :class="{ active: selectedStatus === -1 }" @click="selectedStatus = -1">Rejected</a>
                 </li>
             </ul>
@@ -164,6 +167,7 @@
                             <span class="text-warning" v-if="application.status == 0">Pending</span>
                             <span class="text-success" v-else-if="application.status == 1">Matched</span>
                             <span class="text-success" v-else-if="application.status == 2">Shortlisted</span>
+                            <span class="text-success" v-else-if="application.status == 3">Interview Confirmed</span>
                             <span class="text-danger" v-else>Rejected</span>
                         </td>
                         <td v-if="selectedStatus !== -1">
@@ -229,10 +233,19 @@
                         </td>
                         <td>
                             <div class="d-flex align-items-center gap-2">
-                                <button class="btn btn-primary" v-if="![1,-1].includes(application.status)" @click="updateStatus(application, 'matched')" :disabled="isMatch"><i class="fas fa-check me-1"></i>Match</button>
+                                <button class="btn btn-primary d-flex align-items-center" v-if="application.status == 0" @click="updateStatus(application)" :disabled="loadingId === application.id">
+                                    <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true" v-if="loadingId === application.id"></span>
+                                    <i class="fas fa-check me-1" v-else></i>Match
+                                </button>
+                             
+                                <button class="btn btn-primary" v-if="!application.interview_mode && ![0,-1].includes(application.status)" data-bs-toggle="modal" data-bs-target="#modal" @click="openSchedule(application.id)"><i class="fas fa-calendar-alt me-1"></i> Schedule Interview</button>
+
+                                <button class="btn btn-danger d-flex align-items-center" v-if="application.status != -1" @click="reject(application)" :disabled="loadingRejectedId === application.id">
+                                    <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true" v-if="loadingRejectedId === application.id"></span>
+                                    <i class="fas fa-times me-1" v-else></i>Reject
+                                </button>
+
                                 <!-- <button class="btn btn-danger" @click="deleteApplication(application)"><i class="fas fa-trash-alt"></i>&nbsp;Delete</button> -->
-                                <button class="btn btn-primary" v-if="!application.interview_mode" data-bs-toggle="modal" data-bs-target="#modal" @click="openSchedule(application.id)"><i class="fas fa-calendar-alt me-1"></i> Schedule Interview</button>
-                                <button class="btn btn-danger" v-if="application.status != -1" @click="reject(application)" :disabled="isReject"><i class="fas fa-times me-1"></i>Reject</button>
                             </div>
                         </td>
                     </tr>
@@ -307,14 +320,14 @@ export default {
         const specializations = ref([]);
         const isSubmit = ref(false);
         const isConfirm = ref(false);
-        const isReject = ref(false);
         const validationErrors = reactive({});
 
         const filtered = ref(false);
         const selectedStatus = ref(null);
 
-        const isMatch = ref(false);
         const showSearch = ref(true);
+        const loadingId = ref(null);
+        const loadingRejectedId = ref(null);
 
         const criteria = reactive({
             salary: false,
@@ -448,9 +461,9 @@ export default {
         };
 
         const updateStatus = async (application) => {
-            if (isMatch.value) return;
+            if (loadingId.value) return;
 
-            isMatch.value = true;
+            loadingId.value = application.id;
 
             try {
                 const response = await axios.post(`/api/admin/application/${application.id}/updateStatus`, {});
@@ -467,7 +480,7 @@ export default {
             } catch (error) {
                 console.error("There was an error updating application:", error);
             } finally {
-                isMatch.value = false;
+                loadingId.value = null;
             }
         };
 
@@ -507,9 +520,9 @@ export default {
         };
 
         const reject = async (application) => {
-            if (isReject.value) return;
+            if (loadingRejectedId.value) return;
 
-            isReject.value = true;
+            loadingRejectedId.value = application.id;
 
             try {
                 const response = await axios.post(`/api/admin/application/${application.id}/reject`);
@@ -521,10 +534,12 @@ export default {
                     confirmButtonText: 'Ok'
                 });
 
+                getData();
+
             } catch (error) {
                 console.error("There was an error rejecting applications:", error);
             } finally {
-                isReject.value = false;
+                loadingRejectedId.value = null;
             }
         };
 
@@ -582,12 +597,12 @@ export default {
            selectedStatus,
            filteredApplications,
            reject,
-           isReject,
            validationErrors,
            countPendingApplication,
            countMatchedApplication,
-           isMatch,
-           showSearch
+           showSearch,
+           loadingId,
+           loadingRejectedId
         };
     }
 };
