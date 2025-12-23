@@ -30,7 +30,7 @@ Route::prefix('admin')->group(function(){
         Route::get('/', [CompanyController::class, 'index']);
         Route::post('/create', [CompanyController::class, 'create']);
         Route::get('/getCompany/{id}', [CompanyController::class, 'getCompany']);
-        Route::put('/updateCompany/{id}', [CompanyController::class, 'update']);
+        Route::post('/updateCompany/{id}', [CompanyController::class, 'update']);
         Route::delete('/deleteCompany/{company}', [CompanyController::class, 'delete']);
         Route::get('/search', [CompanyController::class, 'search']);
     });
@@ -87,12 +87,6 @@ Route::prefix('user')->group(function() {
     Route::get('/searchJob', [ApplicantController::class, 'searchJob']);
     
     Route::get('/getJob/{id}', [ApplicantController::class, 'getJob']);
-
-    Route::get('/getSavedJob', [SaveController::class, 'getSavedJob']);
     
     Route::get('/getSpecialization', [ApplicantController::class, 'getSpecialization']);
 });
-
-
-
-// Route::get('/test', [AdminController::class, 'test']);

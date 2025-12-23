@@ -1,46 +1,39 @@
 <template>
     <div>
-        <h2>Create Cew Company</h2>
+        <h2>Create New Company</h2>
 
         <div class="form-group mb-3">
-            <label class="form-label">Name:</label>
-            <input type="text" class="form-control" v-model="form.name">
+            <label class="form-label">Company Name:</label>
+            <input type="text" class="form-control" v-model="form.name" placeholder="Enter company name">
             <span v-if="validationErrors.name" class="text-danger">{{ validationErrors.name[0] }}</span>
         </div>
 
         <div class="form-group mb-3">
-            <label class="form-label">Email:</label>
-            <input type="text" class="form-control" v-model="form.contact_email">
+            <label class="form-label">Contact Email:</label>
+            <input type="text" class="form-control" v-model="form.contact_email" placeholder="Enter contact email">
             <span v-if="validationErrors.contact_email" class="text-danger">{{ validationErrors.contact_email[0] }}</span>
-            <!-- contact_email -->
-        </div> 
+        </div>
+
+        <div class="form-group mb-2">
+            <label class="form-label">Contact Number</label>
+            <div class="input-group">
+                <span class="input-group-text">+60</span>
+                <input type="text" class="form-control" v-model="form.contact_number" placeholder="Enter contact number">
+            </div>
+            <span v-if="validationErrors.contact_number" class="text-danger">{{ validationErrors.contact_number[0] }}</span>
+        </div>
 
         <div class="form-group mb-3">
             <label class="form-label">Address:</label>
             <input type="text" class="form-control" v-model="form.address">
             <span v-if="validationErrors.address" class="text-danger">{{ validationErrors.address[0] }}</span>
-            <!-- text area ? -->
         </div>
 
         <div class="form-group mb-3">
             <label class="form-label">State:</label>
             <v-select :options="states" v-model="form.state" placeholder="Select state"></v-select>
             <span v-if="validationErrors.state" class="text-danger">{{ validationErrors.state[0] }}</span>
-            <!-- <v-select
-                :options="states"
-                v-model="form.state"
-                placeholder="Select state"
-                @input="updateCities">
-            </v-select>
-
-            <v-select
-                :options="availableCities"
-                v-model="form.city"
-                placeholder="Select city"
-                :disabled="!form.state"
-            ></v-select> -->
         </div>
-
 
         <div class="form-group mb-3">
             <label class="form-label">City:</label>
@@ -55,7 +48,6 @@
                 clearable
             />
             <span v-if="validationErrors.city" class="text-danger">{{ validationErrors.city[0] }}</span>
-
         </div>
       
         <div class="form-group mb-3">
@@ -67,11 +59,8 @@
         <div class="form-group mb-3">
             <label class="form-label">Industry:</label>
             <v-select :options="industries" v-model="form.industry" label="label" :reduce="industry => industry.value" placeholder="Select industry"></v-select>
-            <!-- can type then filter by word -->
             <span v-if="validationErrors.industry" class="text-danger">{{ validationErrors.industry[0] }}</span>
         </div>
-
-        add image multiple?
 
         <div class="form-group mb-3">
             <label class="form-label">Profile Image:</label>
@@ -113,12 +102,12 @@ export default {
         const form = reactive({
             name: '',
             contact_email: '',
+            contact_number: '',
             address: '',
             city: '',
             state: '',
             country: '',
             industry: '',
-            // images: '',
         });
 
         const countries = ref([
@@ -189,32 +178,6 @@ export default {
             'Sibu'
         ]);
 
-        // const cities = {
-        // "Johor": ["Johor Bahru", "Batu Pahat", "Muar", "Kluang", "Segamat"],
-        // "Kedah": ["Alor Setar", "Sungai Petani", "Kulim", "Langkawi"],
-        // "Kelantan": ["Kota Bharu", "Pasir Mas", "Tanah Merah"],
-        // "Melaka": ["Melaka City", "Alor Gajah", "Jasin"],
-        // "Negeri Sembilan": ["Seremban", "Port Dickson", "Nilai"],
-        // "Pahang": ["Kuantan", "Temerloh", "Bentong"],
-        // "Perak": ["Ipoh", "Taiping", "Teluk Intan", "Sitiawan"],
-        // "Perlis": ["Kangar", "Arau"],
-        // "Pulau Pinang": ["George Town", "Butterworth", "Bukit Mertajam"],
-        // "Sabah": ["Kota Kinabalu", "Sandakan", "Tawau", "Lahad Datu"],
-        // "Sarawak": ["Kuching", "Miri", "Sibu", "Bintulu"],
-        // "Selangor": ["Shah Alam", "Petaling Jaya", "Klang", "Kajang", "Subang Jaya"],
-        // "Terengganu": ["Kuala Terengganu", "Kemaman", "Dungun"],
-        // "Kuala Lumpur": ["Kuala Lumpur"],
-        // "Putrajaya": ["Putrajaya"],
-        // "Labuan": ["Labuan"]
-        // };
-
-        const availableCities = ref([]);
-
-        const updateCities = () => {
-            // availableCities.value = cities[form.value.state] || [];
-            // form.value.city = null;
-        };
-
         // Handle file upload
         const handleFileUpload = (event) => {
             files.value = Array.from(event.target.files)
@@ -237,11 +200,9 @@ export default {
                 formData.append(`images[${index}]`, file)
             })
 
-            // console.log('length:' + files.value.length)
-
             try {
                 const response = await axios.post('/api/admin/company/create', formData, {
-                    headers: { 'Content-Type': 'mutipart/form-data' }
+                    headers: { 'Content-Type': 'multipart/form-data' }
                 });
 
                 Swal.fire({
@@ -286,8 +247,6 @@ export default {
             countries,
             industries,
             states,
-            availableCities,
-            updateCities,
             cities,
             handleFileUpload,
             previewUrls

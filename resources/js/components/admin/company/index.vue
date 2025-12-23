@@ -74,12 +74,16 @@
                     <tr v-for="(company, index) in companies" :key="company.id">
                         <th scope="row">{{ index + 1 }}</th>
                         <td>
-                            <div class="text-capitalize">
+                            <div class="d-flex align-items-center text-capitalize mb-1">
                                 {{ company.name }} <button class="btn btn-secondary btn-sm ms-1" @click="copyToClipboard(company.name, index, 'name')"> <i :class="copyIcon(index, 'name')"></i></button>
                             </div>
-                            <div v-if="company.contact_email">
+                            <div v-if="company.contact_email" class="d-flex align-items-center mb-1">
                                 {{ company.contact_email }}
                                 <button class="btn btn-secondary btn-sm ms-1" @click="copyToClipboard(company.contact_email, index, 'email')"> <i :class="copyIcon(index, 'email')"></i></button>
+                            </div>
+                            <div v-if="company.contact_number" class="d-flex align-items-center">
+                                +{{ company.contact_number }}
+                                <button class="btn btn-secondary btn-sm ms-1" @click="copyToClipboard(company.contact_number, index, 'contact_number')"> <i :class="copyIcon(index, 'contact_number')"></i></button>
                             </div>
                         </td>
                         <td>
@@ -88,7 +92,7 @@
                             </div>
                             {{ company.country_name }}
 
-                            <div v-if="company.image_paths && company.image_paths.length">
+                            <div v-if="company.image_paths && company.image_paths.length" class="mt-2">
                                 <img
                                     v-for="(img, i) in company.image_paths"
                                     :key="i"
@@ -276,11 +280,8 @@ export default {
             }
         };
 
-        // make it in component method
-
         const copyIcon = (index, field) => {
             return copied.value.index === index && copied.value.field === field ? 'fas fa-copy' : 'far fa-copy';
-            // fas fa-copy
         };
 
         const openImageModal = async () => {

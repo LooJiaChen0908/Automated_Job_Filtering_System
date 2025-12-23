@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Company;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class CompanyController extends Controller
 {
@@ -24,9 +25,27 @@ class CompanyController extends Controller
 
     public function create(Request $request)
     {
+        if($request->filled('contact_number')){
+            $contact = preg_replace('/\D/', '', $request->contact_number);
+
+            if (Str::startsWith($contact, '0')) {
+                $contact = '6' . $contact;
+            } elseif (!Str::startsWith($contact, '6')) {
+                $contact = '60' . $contact;
+            }
+
+            $request->merge([
+                'contact_number' => $contact
+            ]);
+        }
+
         $validated = $request->validate([
             'name' => 'required',
-            'contact_email' => 'nullable', // email
+            'contact_email' => 'required|email',
+            'contact_number' => [
+                'nullable',
+                'regex:/^601[0-9]{8,9}$/'
+            ],
             'address' => 'nullable',
             'city' => 'nullable',
             'country' => 'nullable',
@@ -46,11 +65,10 @@ class CompanyController extends Controller
             }
         }
 
-        // missing contact number
-
         $company = Company::create([
             'name' => $validated['name'],
             'contact_email' => $validated['contact_email'] ?? null,
+            'contact_number' => $validated['contact_number'] ?? null,
             'address' => $validated['address'] ?? null,
             'city' => $validated['city'] ?? null,
             'country' => $validated['country'] ?? null,
@@ -59,8 +77,6 @@ class CompanyController extends Controller
             'image_paths' => $imagePaths,
         ]);
 
-        // Company::create($validated);
-
         return response()->json(['success' => true]);
     }
 
@@ -68,9 +84,27 @@ class CompanyController extends Controller
     {
         $company = Company::findOrFail($id);
 
+        if($request->filled('contact_number')){
+            $contact = preg_replace('/\D/', '', $request->contact_number);
+
+            if (Str::startsWith($contact, '0')) {
+                $contact = '6' . $contact;
+            } elseif (!Str::startsWith($contact, '6')) {
+                $contact = '60' . $contact;
+            }
+
+            $request->merge([
+                'contact_number' => $contact
+            ]);
+        }
+
         $validated = $request->validate([
             'name' => 'required',
-            'contact_email' => 'nullable',
+            'contact_email' => 'required|email',
+            'contact_number' => [
+                'nullable',
+                'regex:/^601[0-9]{8,9}$/'
+            ],
             'address' => 'nullable',
             'city' => 'nullable',
             'country' => 'nullable',
@@ -102,8 +136,10 @@ class CompanyController extends Controller
         $company->update([
             'name' => $validated['name'],
             'contact_email' => $validated['contact_email'] ?? null,
+            'contact_number' => $validated['contact_number'] ?? null,
             'address' => $validated['address'] ?? null,
             'city' => $validated['city'] ?? null,
+            'country' => $validated['country'] ?? null,
             'state' => $validated['state'] ?? null,
             'industry' => $validated['industry'] ?? null,
             'image_paths' => $imagePaths,
@@ -152,10 +188,6 @@ class CompanyController extends Controller
         ->orderBy('created_at','desc')
         ->get()
         ->append(['country_name','industry_name']);
-
-        //  $companies->transform(function ($company) {
-        //     return $company->append(['country_name','industry_name']);
-        // });
 
         return response()->json([
             'success' => true,

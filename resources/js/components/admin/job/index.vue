@@ -82,15 +82,14 @@
                     <tr v-for="(job, index) in jobs" :key="job.id">
                         <th scope="row">{{ index + 1 }}</th>
                         <td>
-                            <div class="d-flex align-items-center gap-1">
+                            <div class="d-flex align-items-center gap-1 mb-1">
                                 <span class="text-capitalize">{{ job.title }}</span>
                                 <span class="badge bg-warning" v-if="job.specialization_name">{{ job.specialization_name }}</span>
                             </div>
 
-                            <!-- {{ job.description }} -->
-
                             <div v-if="job.company" class="text-capitalize">
                                 {{ job.company.name }}
+                                <div class="text-muted mt-1" v-if="job.company.contact_number">+{{ job.company.contact_number}}</div>
                             </div>
                         </td>
                         <td>{{ job.work_mode }}</td>
