@@ -80,9 +80,16 @@ export default {
 
             } catch (error) {
                 console.error('Register failed:', error.response?.data || error.message);
-                
+
                 if (error.response?.status === 422) {
+                    Object.keys(validationErrors).forEach(key => delete validationErrors[key]); // clear old errors
                     Object.assign(validationErrors, error.response.data.errors);
+                } else if (error.response?.status === 401) {
+                    Swal.fire({
+                        title: 'Login failed!',
+                        text: 'Invalid username or password.',
+                        icon: 'error'
+                    });
                 } else {
                     Swal.fire({
                         title: 'Login failed!',
@@ -105,7 +112,8 @@ export default {
             login,
             isShowPassword,
             triggerPassword,
-            validationErrors
+            validationErrors,
+            isSubmit
         };
     }
 };

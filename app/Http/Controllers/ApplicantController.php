@@ -74,7 +74,10 @@ class ApplicantController extends Controller
         ];
 
         if(!Auth::attempt($credentials)){
-            return response()->json(['success' => false, 'test' => 1]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid username or password.'
+            ], 401);
         }
 
         $user = Auth::user();

@@ -43,6 +43,7 @@
 import { ref, reactive, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
 export default {
     name: 'AdminRegister',
@@ -71,10 +72,6 @@ export default {
         };
 
         const register = async () => {
-            router.push({
-                name: 'AdminLogin',
-            });
-            return
 
             if (isSubmit.value) return;
             
@@ -98,6 +95,7 @@ export default {
                 console.error('Register failed:', error.response?.data || error.message);
 
                 if (error.response?.status === 422) {
+                    Object.keys(validationErrors).forEach(key => delete validationErrors[key]); // clear old errors
                     Object.assign(validationErrors, error.response.data.errors);
                 } else {
                     Swal.fire({

@@ -31,6 +31,7 @@
 import { ref, reactive, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
 export default {
     name: 'AdminLogin',
@@ -53,13 +54,6 @@ export default {
         };
        
         const login = async () => {
-
-            // router.push({
-            //     name: 'AdminLayout',
-            // });
-
-            // return
-
             if (isSubmit.value) return;
             
             isSubmit.value = true;
@@ -70,19 +64,29 @@ export default {
 
                 localStorage.setItem('access_token', response.data.access_token);
                 
-                alert('login successful!');
+                Swal.fire({
+                    title: 'Login successfully',
+                    icon: 'success',
+                    confirmButtonColor: '#007bff',
+                    confirmButtonText: 'Ok'
+                });
 
                 axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.access_token}`;
 
-                router.push({
-                    name: 'AdminLayout',
-                });
+                router.push('/admin');
 
             } catch (error) {
                 console.error('Register failed:', error.response?.data || error.message);
 
                 if (error.response?.status === 422) {
+                    Object.keys(validationErrors).forEach(key => delete validationErrors[key]); // clear old errors
                     Object.assign(validationErrors, error.response.data.errors);
+                } else if (error.response?.status === 401) {
+                    Swal.fire({
+                        title: 'Login failed!',
+                        text: 'Invalid username or password.',
+                        icon: 'error'
+                    });
                 } else {
                     Swal.fire({
                         title: 'Login failed!',

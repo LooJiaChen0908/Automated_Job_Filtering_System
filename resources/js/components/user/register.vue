@@ -92,6 +92,7 @@ export default {
                 console.error('Register failed:', error.response?.data || error.message);
 
                 if (error.response?.status === 422) {
+                    Object.keys(validationErrors).forEach(key => delete validationErrors[key]); // clear old errors
                     Object.assign(validationErrors, error.response.data.errors);
                 } else {
                     Swal.fire({
