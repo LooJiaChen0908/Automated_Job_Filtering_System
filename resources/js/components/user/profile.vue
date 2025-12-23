@@ -9,6 +9,7 @@
                 <div class="form-group mb-2">
                     <label>Full name</label>
                     <input type="text" class="form-control name-input" placeholder="Full Name" v-model="form.name">
+                    <span v-if="validationErrors.name" class="text-danger">{{ validationErrors.name[0] }}</span>
                 </div>
 
                 <div class="form-group mb-2">
@@ -17,6 +18,7 @@
                         <input type="radio" v-model="form.gender" id="male" value="male" name="gender"><label for="male">Male</label>
                         <input type="radio" v-model="form.gender" id="female" value="female" name="gender"><label for="female">Female</label>
                     </div>
+                    <span v-if="validationErrors.gender" class="text-danger">{{ validationErrors.gender[0] }}</span>
                 </div>
 
                 <div class="form-group mb-2">
@@ -25,6 +27,7 @@
                         <span class="input-group-text" id="salary">+60</span>
                         <input type="text" class="form-control" v-model="form.contact_no">
                     </div>
+                    <span v-if="validationErrors.contact_no" class="text-danger">{{ validationErrors.contact_no[0] }}</span>
                 </div>
 
                 <div class="form-group mb-2">
@@ -32,17 +35,20 @@
                     <div class="input-group">
                         <span class="input-group-text" id="expected_salary">RM</span>
                         <input type="number" class="form-control" v-model="form.expected_salary"  aria-describedby="expected_salary" min="1">
+                        <span v-if="validationErrors.expected_salary" class="text-danger">{{ validationErrors.expected_salary[0] }}</span>
                     </div>
                 </div>
 
                 <div class="form-group mb-2">
                     <label>Country</label>
                     <v-select :options="countries" v-model="form.country" label="name" :reduce="country => country.id" placeholder="Select country"></v-select>
+                    <span v-if="validationErrors.country" class="text-danger">{{ validationErrors.country[0] }}</span>
                 </div>
 
                 <div class="form-group mb-2">
                     <label>Religion</label>
                     <v-select :options="religions" v-model="form.religion" label="name" :reduce="religion => religion.id"placeholder="Select Religion"></v-select>
+                    <span v-if="validationErrors.religion" class="text-danger">{{ validationErrors.religion[0] }}</span>
                 </div>
             </div>
 
@@ -54,11 +60,15 @@
                         <v-select class="w-33":options="month" placeholder="Month" v-model="form.month" label="name" :reduce="month => month.id"></v-select> /
                         <v-select class="w-33" :options="year" placeholder="Year" v-model="form.year"></v-select>
                     </div>
+                    <span v-if="validationErrors.day" class="text-danger">{{ validationErrors.day[0] }}</span>
+                    <span v-if="validationErrors.month" class="text-danger">{{ validationErrors.month[0] }}</span>
+                    <span v-if="validationErrors.year" class="text-danger">{{ validationErrors.year[0] }}</span>
                 </div>
                 
                 <div class="form-group mb-2">
                     <label>Preferred Work types</label>
                     <v-select :options="employment_types" v-model="form.preferred_work_types" label="name" :reduce="type => type.id" placeholder="Select employment type" multiple></v-select>
+                    <span v-if="validationErrors.preferred_work_types" class="text-danger">{{ validationErrors.preferred_work_types[0] }}</span>
                 </div>
 
                 <div class="form-group mb-2">
@@ -70,6 +80,7 @@
                         :reduce="option => option.id"
                         placeholder="Select education level"
                     />
+                    <span v-if="validationErrors.highest_qualification" class="text-danger">{{ validationErrors.highest_qualification[0] }}</span>
                 </div>
 
                 <div class="form-group mb-2">
@@ -81,11 +92,13 @@
                         :reduce="option => option.id"
                         placeholder="Select work experience"
                     />
+                    <span v-if="validationErrors.work_experience" class="text-danger">{{ validationErrors.work_experience[0] }}</span>
                 </div>
 
                 <div class="form-group">
                     <label>Specialization</label>
                     <v-select :options="specializations" v-model="form.specialization" label="label" :reduce="option => option.value" placeholder="Select Specialization"></v-select>
+                    <span v-if="validationErrors.specialization" class="text-danger">{{ validationErrors.specialization[0] }}</span>
                 </div>
 
                 <!-- resume -->
@@ -236,7 +249,6 @@ export default {
                     ...updatedProfile, // merge updated applicant fields
                 };
                 localStorage.setItem('user_data', JSON.stringify(refreshed));
-                // localStorage.setItem('user_data', JSON.stringify(updatedProfile));
                 
                 Swal.fire({
                     title: 'Profile updated successfully',
@@ -245,17 +257,24 @@ export default {
                     confirmButtonText: 'Ok'
                 });
 
-                // then go refresh the local storage
-
-                // router.push({
-                //     name: 'Login',
-                // });
-
-                // router.replace({ name: 'Profile' });
+                getProfile();
               
             } catch (error) {
                 console.error('Update failed:', error.response?.data || error.message);
-                alert('Update failed!');
+            
+                if (error.response?.status === 422) {
+                    // Clear old errors
+                    Object.keys(validationErrors).forEach(key => delete validationErrors[key]);
+                    // Assign new errors
+                    Object.assign(validationErrors, error.response.data.errors);
+                } else {
+                    Swal.fire({
+                        title: 'Update Failed!',
+                        text: error.response?.data?.message || 'Something went wrong',
+                        icon: 'error'
+                    });
+                }
+
             } finally {
                 isSubmit.value = false;
             }
@@ -274,7 +293,11 @@ export default {
 
                 Object.keys(form).forEach(key => {
                     if (applicant[key] !== undefined && applicant[key] !== null) {
-                        form[key] = applicant[key];
+                        if (key === 'contact_no') {
+                            form.contact_no = applicant.contact_no.replace(/^60/, '');
+                        } else {
+                            form[key] = applicant[key];
+                        }
                     }
                 });
 

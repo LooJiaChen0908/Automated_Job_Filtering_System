@@ -90,7 +90,6 @@ class ApplicantController extends Controller
             'access_token' => $token,
             'token_type' => 'Bearer',
             'user' => $user
-            // 'user_role' => $request->role,
         ]);
     }
 
@@ -119,7 +118,6 @@ class ApplicantController extends Controller
         return response()->json([
             'success' => true,
             'applicant' => $user->applicant
-            // get user?
         ]);
     }
 
@@ -133,26 +131,7 @@ class ApplicantController extends Controller
             return response()->json(['message' => 'Applicant profile not found'], 404);
         }
 
-        // add profile image for applicant ?
-        $validated = $request->validate([
-            'name' => 'required',
-            'gender' => 'required|in:male,female',
-            'contact_no' => 'required',
-            'country' => "nullable",
-            'religion' => 'nullable',
-            // 'email' => 'nullable',
-            'expected_salary' => 'nullable',
-            'work_experience' => 'required',
-            'specialization' => 'required',
-            'highest_qualification' => 'nullable',
-            'day' => 'required|integer|min:1|max:31',
-            'month' => 'required|integer|min:1|max:12',
-            'year' => 'required|integer|min:1900|max:' . date('Y'),
-            'preferred_work_types' => 'nullable|array',
-            'preferred_work_types.*' => 'in:full-time,part-time,temporary,internship', // optional validation
-        ]);
-
-        if ($request->contact_no) {
+        if ($request->filled('contact_no')) {
             $contact = preg_replace('/\D/', '', $request->contact_no);
 
             if (Str::startsWith($contact, '0')) {
@@ -161,19 +140,43 @@ class ApplicantController extends Controller
                 $contact = '60' . $contact;
             }
 
-            $validated['contact_no'] = $contact;
+            $request->merge([
+                'contact_no' => $contact
+            ]);
         }
 
-        $birth_date = date('Y-m-d', strtotime("{$request->year}-{$request->month}-{$request->day}"));
-        $validated['birth_date'] = $birth_date;
-        $validated['name'] = ucwords(strtolower($validated['name']));
+        $validated = $request->validate([
+            'name' => 'required',
+            'gender' => 'required|in:male,female',
+            'contact_no' => [
+                'required',
+                'regex:/^601[0-9]{8,9}$/'
+            ],
+            'country' => "nullable",
+            'religion' => 'nullable',
+            // 'email' => 'nullable',
+            'expected_salary' => 'nullable',
+            'work_experience' => 'required',
+            'specialization' => 'required',
+            'highest_qualification' => 'nullable',
+            'day' => 'nullable|integer|min:1|max:31',
+            'month' => 'nullable|integer|min:1|max:12',
+            'year' => 'nullable|integer|min:1900|max:' . date('Y'),
+            'preferred_work_types' => 'nullable|array',
+            'preferred_work_types.*' => 'in:full-time,part-time,temporary,internship', // optional validation
+        ]);
 
+        if($request->year && $request->month && $request->day){
+            $birth_date = date('Y-m-d', strtotime("{$request->year}-{$request->month}-{$request->day}"));
+            $validated['birth_date'] = $birth_date;
+        }
+        
+        $validated['name'] = ucwords(strtolower($validated['name']));
         $applicant->update($validated);
        
         return response()->json(['success' => true]);
     }
 
-    // paginate?
     public function getAvailableJobs(Request $request)
     {
         $jobs = JobPosting::with('company','savedJobs')->where('status', 1)->latest()->get();
@@ -182,11 +185,8 @@ class ApplicantController extends Controller
             $job->created_at_human = $job->created_at->diffForHumans();
         });
 
-        // $savedJobs = \App\Models\SavedJob::get();
-
         return response()->json([
             'jobs' => $jobs,
-            // 'savedJobs' => $savedJobs,
             'success' => true,
         ]);
     }
