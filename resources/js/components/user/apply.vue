@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div style="background-color: #bfbbbb;">
         <div class="p-5">
             <Loading v-if="loading" />
 
@@ -97,8 +97,7 @@ export default {
                     confirmButtonText: 'Okay'
                 });
 
-                // alert('Please upload your resume before submitting.')
-                return
+                return;
             }
 
             // if(!name){
@@ -135,7 +134,15 @@ export default {
 
             } catch (error) {
                 console.error('Apply failed:', error.response?.data || error.message);
-                alert('failed!');
+                
+                if (error.response?.status) {
+                    Swal.fire({
+                        title: 'Apply job failed!',
+                        text: error.response?.data?.message || 'Something went wrong',
+                        icon: 'error'
+                    });
+                }
+
             } finally {
                 isSubmit.value = false;
             }

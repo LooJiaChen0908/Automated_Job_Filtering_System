@@ -47,48 +47,51 @@
     
         <Loading v-if="loading" /> 
 
-        <div v-if="jobs.length" style="background-color: #bfbbbb;" class="px-3 py-3">
+        <div class="px-3 py-3" style="background-color: #bfbbbb;">
             <div>
                 <h3 class="mb-4">Recommendations</h3>
 
-                <!-- <p class="text-muted">4565</p> -->
+                <div v-if="is_empty_search">
+                    No jobs match your search criteria. Try adjusting the filters
+                </div>
 
-                <div v-for="job in jobs" :key="job.id" class="mb-3" style="background-color: white; border-radius: 10px;">
-                    <div class="ms-3" @click="viewDetail(job)">
-                        <div class="d-flex align-items-center gap-2 mb-2">
-                            <b class="text-capitalize">{{job.title}} - {{job.company ? job.company.state : '-'}}</b>
-                            <span class="badge bg-danger" v-if="isNew(job.created_at)">NEW</span>
-                        </div>
-                
-                        <div class="d-flex align-items-center gap-2 mb-1">
-                            <i class="fas fa-map-marker-alt"></i>{{ job.work_location }}
-                        </div>
+                <div v-if="jobs.length">
+                    <div v-for="job in jobs" :key="job.id" class="mb-3" style="background-color: white; border-radius: 10px;">
+                        <div class="ms-3" @click="viewDetail(job)">
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <b class="text-capitalize">{{job.title}} {{job.company ? '- ' + job.company.state : ''}}</b>
+                                <span class="badge bg-danger mt-1" v-if="isNew(job.created_at)">NEW</span>
+                            </div>
+                    
+                            <div class="d-flex align-items-center gap-2 mb-1" v-if="job.work_location">
+                                <i class="fas fa-map-marker-alt"></i>{{ job.work_location }}
+                            </div>
 
-                        <div class="d-flex align-items-center gap-2 mb-1" v-if="job.specialization_name">
-                            <i class="fas fa-building"></i>{{ job.specialization_name }}
-                        </div>
+                            <div class="d-flex align-items-center gap-2 mb-1" v-if="job.specialization_name">
+                                <i class="fas fa-building"></i>{{ job.specialization_name }}
+                            </div>
 
-                        <div class="d-flex align-items-center gap-2 mb-1" v-if="job.employment_type">
-                            <i class="fas fa-clock"></i> {{ job.employment_type.charAt(0).toUpperCase() + job.employment_type.slice(1) }}
-                        </div>
+                            <div class="d-flex align-items-center gap-2 mb-1" v-if="job.employment_type">
+                                <i class="fas fa-clock"></i> {{ job.employment_type.charAt(0).toUpperCase() + job.employment_type.slice(1) }}
+                            </div>
 
-                        <div class="d-flex align-items-center gap-2">
-                            <i class="fas fa-money-bill"></i> RM {{job.salary_min}} - RM {{job.salary_max}}
-                        </div>
-                            
-                        <div class="d-flex justify-content-between align-items-center mt-3 mb-2">
-                            <span class="text-muted">{{job.created_at_human}}</span>
-                            <i 
-                                :class="[job.saved_jobs && job.saved_jobs.length > 0 ? 'fas fa-bookmark text-primary' : 'far fa-bookmark']" 
-                                class="me-2 cursor-pointer" 
-                                @click.stop="triggerSave(job)" 
-                                :title="job.saved_jobs && job.saved_jobs.length > 0 ? 'Unsave' : 'Save'"
-                                data-toggle="tooltip" data-placement="top"
-                            ></i>
-
+                            <div class="d-flex align-items-center gap-2" v-if="job.salary_min && job.salary_max">
+                                <i class="fas fa-money-bill"></i> RM {{job.salary_min}} - RM {{job.salary_max}}
+                            </div>
+                                
+                            <div class="d-flex justify-content-between align-items-center mt-3 mb-2">
+                                <span class="text-muted">{{job.created_at_human}}</span>
+                                <i 
+                                    :class="[job.saved_jobs && job.saved_jobs.length > 0 ? 'fas fa-bookmark text-primary' : 'far fa-bookmark']" 
+                                    class="me-2 cursor-pointer" 
+                                    @click.stop="triggerSave(job)" 
+                                    :title="job.saved_jobs && job.saved_jobs.length > 0 ? 'Unsave' : 'Save'"
+                                    data-toggle="tooltip" data-placement="top"
+                                ></i>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </div>  
             </div>
         </div>
     </div>
@@ -118,6 +121,8 @@ export default {
             employment_type: '',
             work_mode: '',
         });
+
+        const is_empty_search = ref(false);
 
         const employment_types = ref([
             { id: 'full-time', name: 'Full-time' },
@@ -162,7 +167,7 @@ export default {
 
                 if (isSaved) {
                     job.saved_jobs = [];
-                    // alert('unsave successful!');
+
                     Swal.fire({
                         title: 'Unsave successfully',
                         icon: 'success',
@@ -172,7 +177,7 @@ export default {
 
                 } else {
                     job.saved_jobs = [{}];
-                    // alert('save successful!');
+
                     Swal.fire({
                         title: 'Save successfully',
                         icon: 'success',
@@ -183,7 +188,16 @@ export default {
               
             } catch (error) {
                 console.error('save failed:', error.response?.data || error.message);
-                alert('save failed!');
+
+                const text = isSaved ? 'Unsave' : 'Save';
+
+                if (error.response?.status) {
+                    Swal.fire({
+                        title: `${text} job failed!`,
+                        text: error.response?.data?.message || 'Something went wrong',
+                        icon: 'error'
+                    });
+                }
             }
         };
 
@@ -203,16 +217,17 @@ export default {
 
                 jobs.value = response.data.jobs;
 
-                // if (!jobs.value.length) {
-                //     Swal.fire('No results found', '', 'info');
-                // }
+                if (!jobs.value.length) {
+                    is_empty_search.value = true;
+                    // Swal.fire('No results found', '', 'info');
+                }else{
+                    is_empty_search.value = false;
+                }
 
             } catch (error) {
                 console.error('Search failed:', error.response?.data || error.message);
                 Swal.fire('Search failed', '', 'error');
             }
-           
-
         };
 
         const viewDetail = async (job) => {
@@ -229,6 +244,7 @@ export default {
            isNew,
            search_item,
            employment_types,
+           is_empty_search,
         };
     }
 };

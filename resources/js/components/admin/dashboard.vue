@@ -1,10 +1,22 @@
 <template>
     <div>
-        <h2>Dashboard Page</h2>
+        <div class="mb-2">
+            <h2>Dashboard Page</h2>
+        </div>
 
         <Loading v-if="loading" />
 
         <div class="d-flex align-items-center gap-2" v-else>
+
+            <div class="card" @click="goTo('user')">
+                <div class="card-icon">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="card-info">
+                    <h3>Users</h3>
+                    <p>{{ countUser }}</p>
+                </div>
+            </div>
           
             <div class="card" @click="goTo('company')">
                 <div class="card-icon">
@@ -23,14 +35,14 @@
                 <div class="card-info">
                     <h3>Jobs</h3>
                     <p>{{ countJob }}</p>
-                    <div class="d-flex align-items-center gap-2 justify-content-center">
+                    <!-- <div class="d-flex align-items-center gap-2 justify-content-center">
                         <div class="circle-wrapper bg-green">
                             {{ activeJob }}
                         </div>
                         <div class="circle-wrapper bg-red">
                             {{ inactiveJob }}
                         </div>
-                    </div>
+                    </div> -->
                     <!-- <span class="text-success">{{ activeJob }}</span> | <span class="text-danger">{{inactiveJob}}</span> -->
                    
                     <!-- how many active how many inactive -->
@@ -44,16 +56,6 @@
                 <div class="card-info">
                     <h3>Applications</h3>
                     <p>{{ countApplication }}</p>
-                </div>
-            </div>
-
-            <div class="card" @click="goTo('user')">
-                <div class="card-icon">
-                    <i class="fas fa-user"></i>
-                </div>
-                <div class="card-info">
-                    <h3>Users</h3>
-                    <p>{{ countUser }}</p>
                 </div>
             </div>
 

@@ -2,7 +2,7 @@
     <div>
         <nav class="navbar navbar-expand-lg navbar-light fixed-top bg-primary">
             <div class="container-fluid">
-                <a class="navbar-brand" href="#">Admin System</a>
+                <a class="navbar-brand text-white" href="#">Admin System</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                     <span class="navbar-toggler-icon"></span>
                 </button>
@@ -62,7 +62,7 @@ export default {
                         }
                     });
 
-                    ['access_token', 'user_data'].forEach(item => {
+                    ['access_token'].forEach(item => {
                         if (localStorage.getItem(item)) {
                             localStorage.removeItem(item);
                         }
@@ -106,18 +106,21 @@ export default {
 </script>
 
 <style scoped>
-  .btn-logout{
-    border-bottom-right-radius: 20px;
-    border-top-right-radius: 20px;
-    border-top-left-radius: 20px;
-    border-bottom-left-radius: 20px;
-    background-color: lightgray;
-    color: white;
-  }
+    .btn-logout{
+        border-bottom-right-radius: 20px;
+        border-top-right-radius: 20px;
+        border-top-left-radius: 20px;
+        border-bottom-left-radius: 20px;
+        color: #0d6efd; /* Bootstrap primary blue */
+        background-color: #ffffff; /* white */
+    }
 
+    .btn-logout:hover {
+        background-color: #e6f0ff; /* soft blue tint */
+    }
 
-  .navbar{
-    border-bottom: 1px solid lightgray;
-  }
+    .navbar{
+        border-bottom: 1px solid lightgray;
+    }
 </style>
   
