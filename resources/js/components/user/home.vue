@@ -47,7 +47,7 @@
     
         <Loading v-if="loading" /> 
 
-        <div class="px-3 py-3" style="background-color: #bfbbbb;">
+        <div class="px-3 py-3" style="background-color: #bfbbbb;" v-else>
             <div>
                 <h3 class="mb-4">Recommendations</h3>
 
@@ -98,7 +98,7 @@
 </template>
 
 <script>
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import Swal from 'sweetalert2';
@@ -233,6 +233,12 @@ export default {
         const viewDetail = async (job) => {
             router.push({ name: 'JobDetail', params: { id: job.id} });
         };
+
+        watch(() => form.keyword, (newVal) => {
+            if (!newVal) {
+                search();
+            }
+        });
 
         return {
            jobs,

@@ -57,15 +57,4 @@ class SaveController extends Controller
             'success' => false
         ]);
     }
-
-    public function getSavedJob()
-    {
-        $savedJobs = SavedJob::get();
-        // where('applicant_id', 1)->
-
-        return response()->json([
-            'success' => true,
-            'data' => $savedJobs
-        ]);
-    }
 }

@@ -50,7 +50,6 @@ class AdminController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'User registered successfully!',
-            // 'user' => $user, // Optionally return user info
         ], 201);
     }
 
@@ -89,8 +88,6 @@ class AdminController extends Controller
             'success' => true,
             'access_token' => $token,
             'token_type' => 'Bearer',
-            // 'user_role' => $request->role,
-            // 'user' => $user
         ]);
     }
 

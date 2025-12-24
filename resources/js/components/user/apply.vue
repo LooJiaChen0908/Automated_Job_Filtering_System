@@ -120,8 +120,6 @@ export default {
                         Authorization: `Bearer ${localStorage.getItem('access_token')}`,
                     }
                 });
-
-                console.log('success:', response.data);
                 
                 Swal.fire({
                     title: 'Submitted successfully',

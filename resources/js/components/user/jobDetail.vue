@@ -34,7 +34,7 @@
                 </div>
 
                 <div class="d-flex align-items-center gap-2 mb-4">
-                    <button class="btn btn-primary" @click="apply(job)">Apply</button>
+                    <button class="btn btn-primary" @click="apply(job)" v-if="!isApplied">Apply</button>
                     <button class="btn btn-outline-primary" @click="toggleSave(job)" :disabled="isToggle">{{ job.saved_jobs && job.saved_jobs.length > 0 ? 'Unsave' : 'Save' }}</button>
                     <!-- v-if="!job.saved_jobs?.length" -->
                 </div>
@@ -93,6 +93,7 @@ export default {
         const route = useRoute();
         const loading = ref(false);
         const isToggle = ref(false);
+        const isApplied  = ref(false);
 
         const educationLevels = [
             { id: 'none', name: 'No formal education required' },
@@ -113,10 +114,34 @@ export default {
             const jobId = route.params.id;
 
             try {
-                const response = await axios.get(`/api/user/getJob/${jobId}`);
+                const response = await axios.get(`/api/user/getJob/${jobId}`, {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+                    }
+                });
+
                 job.value = response.data.data;
-            } catch (err) {
-                error.value = err.response?.data?.message || 'Error fetching job';
+                isApplied.value = response.data.is_applied;
+
+            } catch (error) {
+                error.value = error.response?.data?.message || 'Error fetching job';
+
+                if (error.response?.status) {
+                    Swal.fire({
+                        title: 'Fetching job failed!',
+                        text: error.response?.data?.message || 'Something went wrong',
+                        icon: 'error',
+                        allowOutsideClick: false,  
+                        allowEscapeKey: false,
+                        confirmButtonColor: '#007bff',
+                        confirmButtonText: 'Ok'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            router.push({ name: 'Home' });
+                        }
+                    });
+                }
+
             } finally {
                 loading.value = false;
             }
@@ -192,7 +217,8 @@ export default {
             toggleSave,
             loading,
             getEducationName,
-            isToggle
+            isToggle,
+            isApplied,
         };
     }
 };

@@ -218,11 +218,24 @@ class ApplicantController extends Controller
 
     public function getJob(Request $request)
     {
+        if (!$user = Auth::user()) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        if (!$applicant = $user->applicant) {
+            return response()->json(['message' => 'Applicant profile not found'], 404);
+        }
+
         $job = JobPosting::with('company', 'savedJobs')->findOrFail($request->id);
 
         $job->created_at_human = $job->created_at->diffForHumans();
 
-        return response()->json(['data' => $job]);
+        $is_applied = Application::where('applicant_id', $applicant->id)->where('job_id', $job->id)->exists();
+
+        return response()->json([
+            'data' => $job,
+            'is_applied' => $is_applied
+        ]);
     }
 
     public function getSpecialization()

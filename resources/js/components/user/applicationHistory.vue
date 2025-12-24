@@ -1,5 +1,5 @@
 <template>
-    <div class="p-5"  style="background-color: #bfbbbb;">
+    <div class="p-5" style="background-color: #bfbbbb;">
         <!-- <h2>Application History</h2> -->
 
         <ul class="nav nav-tabs mb-3 custom-tabs">
@@ -63,7 +63,8 @@
                     <div class="card mb-2" v-for="a_job in applied_jobs" :key="a_job.id">
                         <div class="card-body">
                             <div v-if="a_job.confirmed_slot" class="alert alert-success">
-                                Confirmed Interview: {{ $moment(a_job.confirmed_slot).format('YYYY-MM-DD HH:mm A') }}
+                                Your interview has been confirmed for 
+                                {{ $moment(a_job.confirmed_slot).format('dddd, MMMM D, YYYY [at] h:mm A') }}.
                             </div>
 
                             <div v-if="a_job.interview_status == 1" class="alert alert-info">
@@ -75,7 +76,10 @@
                                 <div class="d-flex align-items-center justify-content-between mb-2">
                                     <u><b>{{a_job.job.title}}</b></u>
                                     <span class="badge bg-warning" v-if="a_job.status == 0">Pending</span>
-                                    <span class="badge bg-success" v-else="a_job.status == 1">Approved</span>
+                                    <span class="badge bg-info" v-else-if="a_job.status == 1">Matched</span>
+                                    <span class="badge bg-primary" v-else-if="a_job.status == 2">Shortlisted</span>
+                                    <span class="badge bg-success" v-else-if="a_job.status == 3">Interview Confirmed</span>
+                                    <span class="badge bg-danger" v-else=>Rejected</span>
                                 </div>
                             
                                 <div v-if="a_job.job.company">{{a_job.job.company.name}}</div>
@@ -85,7 +89,7 @@
                                 {{a_job.job.company.city}}, {{a_job.job.company.state}}
                             </div>
 
-                            <div v-if="a_job.job.salary_min" class="mb-2">
+                            <div v-if="a_job.job.salary_min && a_job.job.salary_max" class="mb-2">
                                 RM {{a_job.job.salary_min}} - RM {{a_job.job.salary_max}}
                             </div>
                         
@@ -189,6 +193,23 @@ export default {
 
             } catch (error) {
                 console.error("Error fetching jobs:", error);
+
+                if (error.response?.status) {
+                    Swal.fire({
+                        title: 'Fetching jobs failed!',
+                        text: error.response?.data?.message || 'Something went wrong',
+                        icon: 'error',
+                        allowOutsideClick: false,  
+                        allowEscapeKey: false,
+                        confirmButtonColor: '#007bff',
+                        confirmButtonText: 'Ok'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            router.back();
+                        }
+                    });
+                }
+
             } finally {
                 loading.value = false;
             }
@@ -226,6 +247,23 @@ export default {
 
             } catch (error) {
                 console.error("There was an error selecting interview schedule:", error); 
+
+                if (error.response?.status) {
+                    Swal.fire({
+                        title: 'Selecting interview schedule failed!',
+                        text: error.response?.data?.message || 'Something went wrong',
+                        icon: 'error',
+                        allowOutsideClick: false,  
+                        allowEscapeKey: false,
+                        confirmButtonColor: '#007bff',
+                        confirmButtonText: 'Ok'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            router.back();
+                        }
+                    });
+                }
+
             } finally {
                 isSelect.value = false;
             }
@@ -257,6 +295,23 @@ export default {
 
             } catch (error) {
                 console.error("There was an error submitting interview schedule:", error); 
+
+                if (error.response?.status) {
+                    Swal.fire({
+                        title: 'Submitting interview schedule failed!',
+                        text: error.response?.data?.message || 'Something went wrong',
+                        icon: 'error',
+                        allowOutsideClick: false,  
+                        allowEscapeKey: false,
+                        confirmButtonColor: '#007bff',
+                        confirmButtonText: 'Ok'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            router.back();
+                        }
+                    });
+                }
+
             } finally {
                 isSubmit.value = false;
             }

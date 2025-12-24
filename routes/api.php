@@ -69,6 +69,8 @@ Route::prefix('user')->group(function() {
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/logout', [ApplicantController::class, 'logout']);
 
+        Route::get('/getJob/{id}', [ApplicantController::class, 'getJob']);
+
         Route::get('/getProfile', [ApplicantController::class, 'getProfile']);
         Route::post('/updateProfile', [ApplicantController::class, 'updateProfile']);
         
@@ -85,8 +87,6 @@ Route::prefix('user')->group(function() {
     Route::get('/getAvailableJobs', [ApplicantController::class, 'getAvailableJobs']);
     
     Route::get('/searchJob', [ApplicantController::class, 'searchJob']);
-    
-    Route::get('/getJob/{id}', [ApplicantController::class, 'getJob']);
     
     Route::get('/getSpecialization', [ApplicantController::class, 'getSpecialization']);
 });
