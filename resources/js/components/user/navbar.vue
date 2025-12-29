@@ -85,7 +85,7 @@ setup(){
                 });
 
                 router.push({
-                    name: 'Register',
+                    name: 'Login',
                 });
 
                 await Swal.fire({

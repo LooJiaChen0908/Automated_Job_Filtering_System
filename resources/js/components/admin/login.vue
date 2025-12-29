@@ -23,6 +23,8 @@
             </div>
             
             <button class="btn btn-primary w-100" @click="login" @disabled="isSubmit">Login</button>
+
+            <span>Don't have an account? <router-link to="/register" class="text-decoration-none">Sign Up now!</router-link></span>
         </div>
     </div>
 </template>

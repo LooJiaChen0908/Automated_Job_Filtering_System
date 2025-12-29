@@ -58,6 +58,7 @@ const adminRoutes = [
         path: '/admin',
         name: 'AdminLayout',
         component: AdminLayout,
+        meta: { requiresAuth: true, role: 'admin' },
         children: [
             {
                 path: '', // Default path
@@ -134,6 +135,7 @@ const userRoutes = [
     { 
         path: '/user/home', 
         component: UserLayout,
+        meta: { requiresAuth: true, role: 'user' },
         children: [
             { 
                 path: '', 
@@ -174,5 +176,20 @@ const router = createRouter({
   history: createWebHistory(),
   routes,
 })
+
+router.beforeEach((to, from, next) => {
+  const token = localStorage.getItem('access_token');
+
+  if (to.meta.requiresAuth && !token) {
+    // Not logged in → redirect to appropriate login page
+    if (to.meta.role === 'admin') {
+      return next({ name: 'AdminLogin' });
+    } else {
+      return next({ name: 'Login' });
+    }
+  }
+
+  next();
+});
 
 export default router;
