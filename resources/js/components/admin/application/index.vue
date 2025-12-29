@@ -67,7 +67,7 @@
         </div>
 
         <div v-if="!loading && !applications.length">
-            <p v-if="filtered">No applications match your filter criteria. Try adjusting the filters.</p>
+            <p v-if="filtered">No applications match the filter criteria. Try adjusting the filters.</p>
             <p v-else>No applications available. Please add some.</p>
         </div>
 
@@ -133,12 +133,12 @@
                             <p>Salary min {{application.job.salary_min}}</p> -->
                         </td>
                         <td>
-                            <div class="d-flex align-items-center gap-1 mb-1">
+                            <div class="d-flex align-items-center gap-1 mb-1" v-if="application.applicant.email">
                                 {{ application.applicant.email }}
                                 <!-- <button class="btn btn-secondary btn-sm" @click="sendEmail(application.applicant.email)"><i class="fas fa-envelope"></i></button> -->
                             </div>
 
-                            <div class="d-flex align-items-center gap-1">
+                            <div class="d-flex align-items-center gap-1" v-if="application.applicant.contact_no">
                                 +{{ application.applicant.contact_no }}
                                 <!-- <button class="btn btn-secondary btn-sm ms-1" @click="call(application.applicant.contact_no)"><i class="fas fa-phone"></i></button> -->
                             </div>

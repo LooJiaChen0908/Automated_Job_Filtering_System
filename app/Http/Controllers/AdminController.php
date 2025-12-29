@@ -37,6 +37,7 @@ class AdminController extends Controller
             return response()->json([
                 'success' => false,
                 'errors' => $validator->errors(),
+                'message' => 'Invalid ID or Already register.'
             ], 422);
         }
 

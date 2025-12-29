@@ -129,6 +129,7 @@ export default {
             company_id: '',
             description: '',
             work_mode: '',
+            work_location: '',
             salary_min: '',
             salary_max: '',
             specialization: '',
