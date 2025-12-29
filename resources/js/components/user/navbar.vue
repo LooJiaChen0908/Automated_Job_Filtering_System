@@ -74,15 +74,18 @@ setup(){
             try {
                 await axios.post('/api/user/logout', {}, {
                     headers: {
-                        Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+                        Authorization: `Bearer ${localStorage.getItem('user_access_token')}`,
                     }
                 });
 
-                ['access_token', 'user_data'].forEach(item => {
+                ['user_access_token', 'user_data'].forEach(item => {
                     if (localStorage.getItem(item)) {
                         localStorage.removeItem(item);
                     }
                 });
+
+                // Clear axios header
+                delete axios.defaults.headers.common['Authorization'];
 
                 router.push({
                     name: 'Login',

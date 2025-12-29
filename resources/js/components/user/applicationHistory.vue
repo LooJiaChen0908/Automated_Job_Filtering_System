@@ -41,7 +41,7 @@
 
                             <div class="text-muted mb-2">Posted {{s_job.job_created_at_human}}</div>
 
-                            <div v-if="s_job.job.status != 0">
+                            <div v-if="s_job.job.status != 0 && !s_job.is_applied">
                                 <button class="btn btn-primary" @click="apply(s_job)">Apply</button>
                             </div>
                         </div>
@@ -182,7 +182,7 @@ export default {
             try {
                 const response = await axios.get(`/api/user/getAppliedJob?tab=${currentTab.value}`, {
                     headers: {
-                        Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+                        Authorization: `Bearer ${localStorage.getItem('user_access_token')}`,
                     }
                 });
 
@@ -231,7 +231,7 @@ export default {
                     { selected_slot: slot },
                     {
                         headers: {
-                            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+                            Authorization: `Bearer ${localStorage.getItem('user_access_token')}`,
                         }
                     }
                 );
@@ -279,7 +279,7 @@ export default {
                 { suggested_slots: form.value.slots.filter(slot => slot !== null) },
                 {
                     headers: {
-                        Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+                        Authorization: `Bearer ${localStorage.getItem('user_access_token')}`,
                     },
                 }
                 );

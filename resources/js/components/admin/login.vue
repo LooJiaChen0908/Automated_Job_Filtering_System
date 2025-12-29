@@ -34,6 +34,7 @@ import { ref, reactive, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import adminApi from '@/services/adminApi';
 
 export default {
     name: 'AdminLogin',
@@ -61,10 +62,10 @@ export default {
             isSubmit.value = true;
 
             try {
-                const response = await axios.post('/api/admin/login', form);
+                const response = await adminApi.post('/login', form);
                 console.log('login success:', response.data);
 
-                localStorage.setItem('access_token', response.data.access_token);
+                localStorage.setItem('admin_access_token', response.data.access_token);
                 
                 Swal.fire({
                     title: 'Login successfully',
@@ -72,8 +73,6 @@ export default {
                     confirmButtonColor: '#007bff',
                     confirmButtonText: 'Ok'
                 });
-
-                axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.access_token}`;
 
                 router.push('/admin');
 

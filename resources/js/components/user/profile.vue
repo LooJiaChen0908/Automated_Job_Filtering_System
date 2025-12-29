@@ -229,14 +229,14 @@ export default {
             try {
                 const response = await axios.post('/api/user/updateProfile', form, {
                     headers: {
-                        Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+                        Authorization: `Bearer ${localStorage.getItem('user_access_token')}`,
                     }
                 });
 
                 // Optionally fetch the updated profile again
                 const profileRes = await axios.get('/api/user/getProfile', {
                     headers: {
-                        Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+                        Authorization: `Bearer ${localStorage.getItem('user_access_token')}`,
                     }
                 });
 
@@ -285,7 +285,7 @@ export default {
             try {
                 const { data } = await axios.get('/api/user/getProfile', {
                     headers: {
-                        Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+                        Authorization: `Bearer ${localStorage.getItem('user_access_token')}`,
                     }
                 });
 

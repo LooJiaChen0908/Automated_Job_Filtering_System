@@ -116,7 +116,7 @@ export default {
             try {
                 const response = await axios.get(`/api/user/getJob/${jobId}`, {
                     headers: {
-                        Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+                        Authorization: `Bearer ${localStorage.getItem('user_access_token')}`,
                     }
                 });
 
@@ -167,7 +167,7 @@ export default {
             try {
                 const response = await axios.post(endpoint, [], {
                     headers: {
-                        Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+                        Authorization: `Bearer ${localStorage.getItem('user_access_token')}`,
                     }
                 });
 

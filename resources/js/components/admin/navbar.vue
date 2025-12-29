@@ -58,15 +58,18 @@ export default {
                 try {
                     await axios.post('/api/admin/logout', {}, {
                         headers: {
-                            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+                            Authorization: `Bearer ${localStorage.getItem('admin_access_token')}`,
                         }
                     });
 
-                    ['access_token'].forEach(item => {
+                    ['admin_access_token'].forEach(item => {
                         if (localStorage.getItem(item)) {
                             localStorage.removeItem(item);
                         }
                     });
+
+                    // Clear axios header
+                    delete axios.defaults.headers.common['Authorization'];
 
                     router.push({
                         name: 'AdminLogin',

@@ -117,7 +117,7 @@ export default {
             try {
                 const response = await axios.post('/api/user/applyJob', formData, {
                     headers: { 
-                        Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+                        Authorization: `Bearer ${localStorage.getItem('user_access_token')}`,
                     }
                 });
                 

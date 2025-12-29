@@ -50,12 +50,6 @@ class ApplyController extends Controller
         ]);
     }
 
-    public function viewJobList()
-    {
-        $jobs = JobPosting::get();
-        return response()->json($jobs);
-    }
-
     public function getAppliedJob(Request $request)
     {
         if (!$user = Auth::user()) {
@@ -76,19 +70,18 @@ class ApplyController extends Controller
         if ($tab == 'applied') {
             $appliedJobs = Application::with('job','job.company')->where('applicant_id', $applicant_id)->latest()->get();
 
-            // $appliedJobs->each(function ($appliedJob){
-            //     $appliedJob->job_created_at_human = $appliedJob->job->created_at->diffForHumans();
-            // });
-
             $countAppliedJobs = $appliedJobs->count();
 
         } else {
             $savedJobs = SavedJob::with('job','job.company')->where('applicant_id', $applicant_id)->latest()->get();
 
-            $savedJobs->each(function ($savedJob){
-                $savedJob->job_created_at_human = $savedJob->job->created_at->diffForHumans();
-            });
+            $appliedJobIds = Application::where('applicant_id', $applicant_id)->pluck('job_id')->toArray();
 
+            $savedJobs->each(function ($savedJob) use ($appliedJobIds) {
+                $savedJob->job_created_at_human = $savedJob->job->created_at->diffForHumans();
+                $savedJob->is_applied = in_array($savedJob->job_id, $appliedJobIds);
+            });
+            
             $countSavedJobs = $savedJobs->count();
         }
 

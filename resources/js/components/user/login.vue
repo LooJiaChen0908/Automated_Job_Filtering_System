@@ -23,7 +23,7 @@
             </div>
           
             <button class="btn btn-primary w-100" @click="login" :disabled="isSubmit">Login</button>
-            
+
             <span>Don't have an account? <router-link to="/user/register" class="text-decoration-none">Sign Up now!</router-link></span>
         </div>
     </div>
@@ -34,6 +34,7 @@ import { ref, reactive, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import userApi from '@/services/userApi';
 
 export default {
     name: 'Login',
@@ -61,10 +62,10 @@ export default {
             isSubmit.value = true;
 
             try {
-                const response = await axios.post('/api/user/login', form);
+                const response = await userApi.post('/login', form);
                 console.log('login success:', response.data);
 
-                localStorage.setItem('access_token', response.data.access_token);
+                localStorage.setItem('user_access_token', response.data.access_token);
                 localStorage.setItem('user_data', JSON.stringify(response.data.user));
                 
                 Swal.fire({
@@ -73,8 +74,6 @@ export default {
                     confirmButtonColor: '#007bff',
                     confirmButtonText: 'Ok'
                 });
-
-                axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.access_token}`;
 
                 router.push({
                     name: 'Home',

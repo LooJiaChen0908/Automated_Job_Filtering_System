@@ -178,7 +178,7 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  const token = localStorage.getItem('access_token');
+  const token = to.meta.role === 'admin' ? localStorage.getItem('admin_access_token') : localStorage.getItem('user_access_token');
 
   if (to.meta.requiresAuth && !token) {
     // Not logged in → redirect to appropriate login page
