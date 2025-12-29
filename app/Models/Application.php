@@ -32,7 +32,7 @@ class Application extends Model
     const STATUS_PENDING = 0;
     const STATUS_MATCHED = 1;
     const STATUS_SHORTLISTED = 2;
-    const STATUS_INTERVIEW_CONFIRMED = 3; // Interview slot confirmed
+    const STATUS_INTERVIEW_CONFIRMED = 3;
     const STATUS_REJECTED = -1;
    
     // pending -> matched -> shortlisted -> interview confirmed -> final decision
@@ -51,18 +51,7 @@ class Application extends Model
         return $this->belongsTo(JobPosting::class, 'job_id');
     }
 
-    public function histories()
-    {
-        return $this->hasMany(ApplicationHistory::class, 'application_id');
-    }
-
-    public function shortlisted()
-    {
-        return $this->hasMany(Shortlisted::class, 'application_id');
-    }
-
     public function zoomMeetings() {
         return $this->hasMany(ZoomMeeting::class);
     }
-    // pending approved reject 0 1 -1
 }
