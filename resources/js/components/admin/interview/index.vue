@@ -96,6 +96,8 @@ export default {
                     confirmButtonText: 'Ok'
                 });
 
+                getData();
+
             } catch (error) {
                 console.error("There was an error creating meetings:", error);
 

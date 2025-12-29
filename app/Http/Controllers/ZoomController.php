@@ -9,7 +9,7 @@ use App\Models\Application;
 use Carbon\Carbon;
 
 class ZoomController extends Controller
-{
+{ 
     public function create(Request $request, ZoomService $zoom)
     {
         $validated = $request->validate([
@@ -91,5 +91,48 @@ class ZoomController extends Controller
             'success' => true,
             'errors' => $errors,
         ]);
+    }
+
+    public function getMeeting(Request $request)
+    {
+        $meetings = ZoomMeeting::with('application.applicant')
+        ->when($request->zoom_meeting_id, function($query) use ($request){
+            $query->where('zoom_meeting_id', $request->zoom_meeting_id);
+        })
+        ->orderBy('start_time', 'desc')
+        ->get();
+
+        return response()->json([
+            'success' => true,
+            'meetings' => $meetings,
+        ]);
+    }
+
+    public function sendMeetingNotification(Request $request, $id)
+    {
+        $meeting = ZoomMeeting::findOrFail($id);
+
+        Mail::to($meeting->application->applicant->email)->send(new InterviewInvitationMail($meeting));
+
+        return response()->json(['success' => true]);
+    }
+
+    public function delete(Request $request, $id)
+    {
+        try {
+            $meeting = ZoomMeeting::findOrFail($id);
+
+            $zoom = new ZoomService();
+            $zoom->deleteMeeting($meeting->zoom_meeting_id);
+
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            \Log::error('Zoom delete failed: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false, 
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 }

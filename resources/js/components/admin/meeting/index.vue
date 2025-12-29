@@ -65,10 +65,10 @@
                                 <div>
                                     {{meeting.application.applicant.name}}
                                 </div>
-                                <div>
+                                <div v-if="meeting.application.applicant.email">
                                     {{meeting.application.applicant.email}}
                                 </div>
-                                <div>
+                                <div v-if="meeting.application.applicant.contact_no">
                                     +{{meeting.application.applicant.contact_no}}
                                 </div>
                             </div>
@@ -93,6 +93,11 @@
                                 <button class="btn btn-primary d-flex align-items-center" @click="sendNoti(meeting)" :disabled="loadingId === meeting.id">
                                     <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true" v-if="loadingId === meeting.id"></span>
                                     <i class="fas fa-bell me-1" v-else></i>Notify
+                                </button>
+
+                                <button class="btn btn-danger d-flex align-items-center" @click="deleteMeeting(meeting)" :disabled="deletingId === meeting.id">
+                                    <span class="spinner-border spinner-border-sm me-1" v-if="deletingId === meeting.id"></span>
+                                    <i class="fas fa-trash-alt" v-else></i>&nbsp;Delete
                                 </button>
                             </div>
                         </td>
@@ -125,6 +130,7 @@ export default {
         const showSearch = ref(true);
         const isUpdating = ref(false);
         const loadingId = ref(null);
+        const deletingId = ref(null);
 
         const form = reactive({
             zoom_meeting_id: '',
@@ -140,7 +146,7 @@ export default {
             if(showLoading) loading.value = true;
             
             try {
-                const response = await axios.get('/api/admin/application/getMeeting', { params });
+                const response = await axios.get('/api/admin/getMeeting', { params });
                 meetings.value = response.data.meetings;
             } catch (error) {
                 console.error("Error fetching meetings:", error);
@@ -175,7 +181,7 @@ export default {
             loadingId.value = meeting.id;
 
             try {
-                const response = await axios.post(`/api/admin/application/${meeting.id}/sendMeetingNotification`);
+                const response = await axios.post(`/api/admin/${meeting.id}/sendMeetingNotification`);
 
                 Swal.fire({
                     title: 'Notification sent',
@@ -213,6 +219,48 @@ export default {
             }
         };
 
+        const deleteMeeting = async (meeting) => {
+            const result = await Swal.fire({
+                title: 'Are you sure?',
+                text: `You want to delete ${meeting.zoom_meeting_id || ''}!`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes',
+                cancelButtonText: 'Cancel'
+            });
+
+            if (result.isConfirmed) {
+
+                deletingId.value = meeting.id;
+
+                try {
+                    await axios.delete(`/api/admin/deleteMeeting/${meeting.id}`);
+                    Swal.fire({
+                        title: 'Deleted successfully',
+                        icon: 'success',
+                        confirmButtonColor: '#007bff',
+                        confirmButtonText: 'Ok'
+                    });
+                    await getData();
+                } catch (error) {
+                    console.error("There was an error deleting the meeting:", error);
+
+                    if (error.response?.status) {
+                        Swal.fire({
+                            title: 'Failed!',
+                            text: error.response?.data?.message || 'Something went wrong',
+                            icon: 'error'
+                        });
+                    }
+
+                } finally {
+                    deletingId.value = null; 
+                }
+            }
+        };
+
         onMounted(() => getData({}, true));
 
         const search = () => { 
@@ -234,7 +282,9 @@ export default {
            search,
            updateStatus,
            isUpdating,
-           loadingId
+           loadingId,
+           deleteMeeting,
+           deletingId
         };
     }
 };

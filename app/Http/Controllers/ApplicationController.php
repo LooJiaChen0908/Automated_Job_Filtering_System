@@ -27,10 +27,7 @@ class ApplicationController extends Controller
             'job.company'
             ])
             ->latest()
-            ->get();
-            // ->groupBy('job_id'); 
-
-            // group by job id , filter by criteria, then update status
+            ->get();        
 
         // how to with count with applicant number which shown how much applicant apply with it?
 
@@ -97,7 +94,6 @@ class ApplicationController extends Controller
                 if ($this->compareEducationLevel($resumeLevel, $requiredLevel) < 0) {
                     return false;
                 }
-
             }
 
             // previous code
@@ -290,29 +286,5 @@ class ApplicationController extends Controller
             'confirmed_interview' => $confirmed_interview,
             'applications' => $applications,
         ]);
-    }
-
-    public function getMeeting(Request $request)
-    {
-        $meetings = ZoomMeeting::with('application.applicant')
-        ->when($request->zoom_meeting_id, function($query) use ($request){
-            $query->where('zoom_meeting_id', $request->zoom_meeting_id);
-        })
-        ->orderBy('start_time', 'desc')
-        ->get();
-
-        return response()->json([
-            'success' => true,
-            'meetings' => $meetings,
-        ]);
-    }
-
-    public function sendMeetingNotification(Request $request, $id)
-    {
-        $meeting = ZoomMeeting::findOrFail($id);
-
-        Mail::to($meeting->application->applicant->email)->send(new InterviewInvitationMail($meeting));
-
-        return response()->json(['success' => true]);
-    }
+    }   
 }

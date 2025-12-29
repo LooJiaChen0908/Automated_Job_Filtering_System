@@ -59,4 +59,18 @@ class ZoomService
 
         return $response;
     }
+
+    public function deleteMeeting($meetingId)
+    {
+        $token = $this->getAccessToken();
+
+        $response = Http::withToken($token)
+            ->delete("{$this->baseUrl}/meetings/{$meetingId}");
+
+        if ($response->failed()) {
+            throw new \Exception('Failed to delete Zoom meeting: ' . $response->body());
+        }
+
+        return $response;
+    }
 }

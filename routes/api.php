@@ -53,12 +53,13 @@ Route::prefix('admin')->group(function(){
         Route::post('/{id}/confirmSchedule', [ApplicationController::class, 'confirmSchedule']);
         Route::post('/{id}/reject', [ApplicationController::class, 'reject']);
         Route::get('/getConfirmedInterview', [ApplicationController::class, 'getConfirmedInterview']);
-        Route::get('/getMeeting', [ApplicationController::class, 'getMeeting']);
-        Route::post('/{id}/sendMeetingNotification', [ApplicationController::class, 'sendMeetingNotification']); 
     });
 
     Route::post('/createMeeting', [ZoomController::class, 'create']);
     Route::post('/manualUpdate', [ZoomController::class, 'manualUpdate']);
+    Route::get('/getMeeting', [ZoomController::class, 'getMeeting']);
+    Route::post('/{id}/sendMeetingNotification', [ZoomController::class, 'sendMeetingNotification']); 
+    Route::delete('/deleteMeeting/{id}', [ZoomController::class, 'delete']);
 });
 
 //user routes
