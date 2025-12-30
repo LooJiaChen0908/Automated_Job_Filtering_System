@@ -92,7 +92,7 @@
                                 <div class="text-muted mt-1" v-if="job.company.contact_number">+{{ job.company.contact_number}}</div>
                             </div>
                         </td>
-                        <td>{{ job.work_mode }}</td>
+                        <td>{{ job.work_mode ?? '-'}}</td>
                         <td>
                             <div v-if="job.employment_type">
                                 {{ job.employment_type.charAt(0).toUpperCase() + job.employment_type.slice(1) }}

@@ -67,6 +67,7 @@ class JobController extends Controller
         ]);
 
         $validated['status'] = 1;
+        $validated['title'] = ucwords(strtolower($validated['title']));
 
         JobPosting::create($validated);
 
@@ -92,6 +93,7 @@ class JobController extends Controller
             'education_level' => 'nullable|in:none,spm,diploma,bachelor,master,phd',
         ]);
 
+        $validated['title'] = ucwords(strtolower($validated['title']));
         $job->update($validated);
 
         return response()->json(['success' => true]);

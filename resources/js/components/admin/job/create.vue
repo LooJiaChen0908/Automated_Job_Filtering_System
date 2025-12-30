@@ -4,7 +4,7 @@
 
         <div class="form-group mb-3">
             <label class="form-label">Job Title:</label>
-            <input type="text" class="form-control" v-model="form.title">
+            <input type="text" class="form-control title-input" v-model="form.title">
             <span v-if="validationErrors.title" class="text-danger">{{ validationErrors.title[0] }}</span>
         </div>
 
@@ -209,10 +209,11 @@ export default {
 
                     const selectedCompany = companies.value.find(c => c.id === newVal);
                     if (selectedCompany) {
-                        console.log('here '+ selectedCompany.id)
-                        form.specialization = selectedCompany.industry || '';
+                        // hide first
+                        // console.log('here '+ selectedCompany.id)
+                        // form.specialization = selectedCompany.industry || '';
+
                         // form.work_location = selectedCompany.address || '';
-                        // console.log()
                     }
                 }
             }
@@ -237,6 +238,8 @@ export default {
 };
 </script>
 
-<style>
-/* Add some global styles here if needed */
+<style scoped>
+    .title-input{
+        text-transform: capitalize;
+    }
 </style>

@@ -7,7 +7,7 @@
         <div v-else>
             <div class="form-group mb-3">
                 <label class="form-label">Job Title:</label>
-                <input type="text" class="form-control" v-model="form.title">
+                <input type="text" class="form-control title-input" v-model="form.title">
                 <span v-if="validationErrors.title" class="text-danger">{{ validationErrors.title[0] }}</span>
             </div>
 
@@ -275,5 +275,7 @@ export default {
 </script>
 
 <style scoped>
-/* Add styles as needed */
+    .title-input{
+        text-transform: capitalize;
+    }
 </style>
