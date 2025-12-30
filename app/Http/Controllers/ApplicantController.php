@@ -12,6 +12,7 @@ use App\Models\Applicant;
 use App\Models\User;
 use App\Models\JobPosting;
 use App\Models\Application;
+use App\Models\SavedJob;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 
@@ -180,10 +181,23 @@ class ApplicantController extends Controller
 
     public function getAvailableJobs(Request $request)
     {
-        $jobs = JobPosting::with('company','savedJobs')->where('status', 1)->latest()->get();
+        if (!$user = Auth::user()) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
 
-        $jobs->each(function ($job) {
+        if (!$applicant = $user->applicant) {
+            return response()->json(['message' => 'Applicant profile not found'], 404);
+        }
+
+        $jobs = JobPosting::with('company')->where('status', 1)->latest()->get();
+
+        $savedJobIds = SavedJob::where('applicant_id', $applicant->id)->pluck('job_id')->toArray();
+        $appliedJobIds = Application::where('applicant_id', $applicant->id)->pluck('job_id')->toArray();
+
+        $jobs->each(function ($job) use ($savedJobIds, $appliedJobIds) {
             $job->created_at_human = $job->created_at->diffForHumans();
+            $job->is_saved = in_array($job->id, $savedJobIds);
+            $job->is_applied = in_array($job->id, $appliedJobIds);
         });
 
         return response()->json([
@@ -227,9 +241,15 @@ class ApplicantController extends Controller
             return response()->json(['message' => 'Applicant profile not found'], 404);
         }
 
-        $job = JobPosting::with('company', 'savedJobs')->findOrFail($request->id);
+        $job = JobPosting::with([
+            'company', 
+            'savedJobs' => function ($query) use ($applicant) {
+                $query->where('applicant_id', $applicant->id);
+            }
+        ])->findOrFail($request->id);
 
         $job->created_at_human = $job->created_at->diffForHumans();
+        $job->is_saved = $job->savedJobs->isNotEmpty();
 
         $is_applied = Application::where('applicant_id', $applicant->id)->where('job_id', $job->id)->exists();
 

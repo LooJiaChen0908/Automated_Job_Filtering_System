@@ -82,10 +82,10 @@
                             <div class="d-flex justify-content-between align-items-center mt-3 mb-2">
                                 <span class="text-muted">{{job.created_at_human}}</span>
                                 <i 
-                                    :class="[job.saved_jobs && job.saved_jobs.length > 0 ? 'fas fa-bookmark text-primary' : 'far fa-bookmark']" 
+                                    :class="[job.is_saved ? 'fas fa-bookmark text-primary' : 'far fa-bookmark']" 
                                     class="me-2 cursor-pointer" 
                                     @click.stop="triggerSave(job)" 
-                                    :title="job.saved_jobs && job.saved_jobs.length > 0 ? 'Unsave' : 'Save'"
+                                    :title="job.is_saved ? 'Unsave' : 'Save'"
                                     data-toggle="tooltip" data-placement="top"
                                 ></i>
                             </div>
@@ -144,7 +144,11 @@ export default {
         const getData = async () => {
             loading.value = true;
             try {
-                const response = await axios.get('/api/user/getAvailableJobs');
+                const response = await axios.get('/api/user/getAvailableJobs', {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem('user_access_token')}`,
+                    }
+                });
                 jobs.value = response.data.jobs;
             } catch (error) {
                 console.error("Error fetching jobs:", error);
@@ -154,7 +158,7 @@ export default {
         };
 
         const triggerSave = async (job) => {
-            const isSaved = job.saved_jobs && job.saved_jobs.length > 0;
+            const isSaved = job.is_saved;
 
             const endpoint = isSaved ? `/api/user/${job.id}/unsaveJob` : `/api/user/${job.id}/saveJob`;
 
@@ -165,27 +169,16 @@ export default {
                     }
                 });
 
-                if (isSaved) {
-                    job.saved_jobs = [];
+                // Toggle the flag
+                job.is_saved = !isSaved;
 
-                    Swal.fire({
-                        title: 'Unsave successfully',
-                        icon: 'success',
-                        confirmButtonColor: '#007bff',
-                        confirmButtonText: 'Ok'
-                    });
+                Swal.fire({
+                    title: isSaved ? 'Unsave successfully' : 'Save successfully',
+                    icon: 'success',
+                    confirmButtonColor: '#007bff',
+                    confirmButtonText: 'Ok'
+                });
 
-                } else {
-                    job.saved_jobs = [{}];
-
-                    Swal.fire({
-                        title: 'Save successfully',
-                        icon: 'success',
-                        confirmButtonColor: '#007bff',
-                        confirmButtonText: 'Ok'
-                    });
-                }
-              
             } catch (error) {
                 console.error('save failed:', error.response?.data || error.message);
 

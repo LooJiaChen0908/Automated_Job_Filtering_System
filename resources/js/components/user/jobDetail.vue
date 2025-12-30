@@ -35,8 +35,7 @@
 
                 <div class="d-flex align-items-center gap-2 mb-4">
                     <button class="btn btn-primary" @click="apply(job)" v-if="!isApplied">Apply</button>
-                    <button class="btn btn-outline-primary" @click="toggleSave(job)" :disabled="isToggle">{{ job.saved_jobs && job.saved_jobs.length > 0 ? 'Unsave' : 'Save' }}</button>
-                    <!-- v-if="!job.saved_jobs?.length" -->
+                    <button class="btn btn-outline-primary" @click="toggleSave(job)" :disabled="isToggle">{{ job.is_saved ? 'Unsave' : 'Save' }}</button>
                 </div>
 
                 <div class="mb-2" v-if="job.description">
@@ -160,7 +159,7 @@ export default {
 
             isToggle.value = true;
 
-            const isSaved = job.saved_jobs && job.saved_jobs.length > 0;
+            const isSaved = job.is_saved;
 
             const endpoint = isSaved ? `/api/user/${job.id}/unsaveJob` : `/api/user/${job.id}/saveJob`;
 
@@ -171,27 +170,15 @@ export default {
                     }
                 });
 
-                if (isSaved) {
-                    job.saved_jobs = [];
+                job.is_saved = !job.is_saved; // toggle flag
 
-                    Swal.fire({
-                        title: 'Unsave successfully',
-                        icon: 'success',
-                        confirmButtonColor: '#007bff',
-                        confirmButtonText: 'Ok'
-                    });
+                Swal.fire({
+                    title: isSaved ? 'Unsave successfully' : 'Save successfully',
+                    icon: 'success',
+                    confirmButtonColor: '#007bff',
+                    confirmButtonText: 'Ok'
+                });
 
-                } else {
-                    job.saved_jobs = [{}];
-
-                    Swal.fire({
-                        title: 'Save successfully',
-                        icon: 'success',
-                        confirmButtonColor: '#007bff',
-                        confirmButtonText: 'Ok'
-                    });
-                }
-              
             } catch (error) {
                 console.error('save failed:', error.response?.data || error.message);
                 const text = isSaved ? 'Unsave' : 'Save';

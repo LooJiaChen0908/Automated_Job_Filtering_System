@@ -43,7 +43,7 @@ class SaveController extends Controller
             return response()->json(['message' => 'Applicant profile not found'], 404);
         }
 
-        $job = SavedJob::where('id', $id)->where('applicant_id', $user->applicant->id)->first();
+        $job = SavedJob::where('job_id', $id)->where('applicant_id', $user->applicant->id)->first();
         
         if($job){
             $job->delete();
