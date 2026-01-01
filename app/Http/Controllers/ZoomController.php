@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\ZoomMeeting;
 use App\Models\Application;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\InterviewInvitationMail;
 
 class ZoomController extends Controller
 { 
