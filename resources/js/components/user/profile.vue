@@ -35,20 +35,14 @@
                     <div class="input-group">
                         <span class="input-group-text" id="expected_salary">RM</span>
                         <input type="number" class="form-control" v-model="form.expected_salary"  aria-describedby="expected_salary" min="1">
-                        <span v-if="validationErrors.expected_salary" class="text-danger">{{ validationErrors.expected_salary[0] }}</span>
                     </div>
+                    <span v-if="validationErrors.expected_salary" class="text-danger">{{ validationErrors.expected_salary[0] }}</span>
                 </div>
 
                 <div class="form-group mb-2">
                     <label>Country</label>
                     <v-select :options="countries" v-model="form.country" label="name" :reduce="country => country.id" placeholder="Select country"></v-select>
                     <span v-if="validationErrors.country" class="text-danger">{{ validationErrors.country[0] }}</span>
-                </div>
-
-                <div class="form-group mb-2">
-                    <label>Religion</label>
-                    <v-select :options="religions" v-model="form.religion" label="name" :reduce="religion => religion.id"placeholder="Select Religion"></v-select>
-                    <span v-if="validationErrors.religion" class="text-danger">{{ validationErrors.religion[0] }}</span>
                 </div>
             </div>
 
@@ -63,6 +57,12 @@
                     <span v-if="validationErrors.day" class="text-danger">{{ validationErrors.day[0] }}</span>
                     <span v-if="validationErrors.month" class="text-danger">{{ validationErrors.month[0] }}</span>
                     <span v-if="validationErrors.year" class="text-danger">{{ validationErrors.year[0] }}</span>
+                </div>
+
+                <div class="form-group mb-2">
+                    <label>Religion</label>
+                    <v-select :options="religions" v-model="form.religion" label="name" :reduce="religion => religion.id"placeholder="Select Religion"></v-select>
+                    <span v-if="validationErrors.religion" class="text-danger">{{ validationErrors.religion[0] }}</span>
                 </div>
                 
                 <div class="form-group mb-2">
@@ -82,7 +82,7 @@
                     />
                     <span v-if="validationErrors.highest_qualification" class="text-danger">{{ validationErrors.highest_qualification[0] }}</span>
                 </div>
-
+<!-- 
                 <div class="form-group mb-2">
                     <label>Work Experiences</label>
                     <v-select
@@ -93,7 +93,7 @@
                         placeholder="Select work experience"
                     />
                     <span v-if="validationErrors.work_experience" class="text-danger">{{ validationErrors.work_experience[0] }}</span>
-                </div>
+                </div> -->
 
                 <div class="form-group">
                     <label>Specialization</label>

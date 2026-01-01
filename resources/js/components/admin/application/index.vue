@@ -20,7 +20,7 @@
                 <div class="d-flex align-items-center gap-2">
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" id="salary" v-model="criteria.salary">
-                        <label class="form-check-label" for="flexCheckDefault">
+                        <label class="form-check-label" for="salary">
                             Salary
                         </label>
                     </div>
@@ -42,27 +42,15 @@
                             Education level
                         </label>
                     </div>
-                    <!-- <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="work_type" v-model="criteria.work_type">
-                        <label class="form-check-label" for="work_type">
-                            Work Type
-                        </label>
-                    </div> -->
-
-                    <!-- <v-select
-                        :options="specializations"
-                        v-model="criteria.selected_specialization"
-                        label="label"
-                        :reduce="option => option.value"
-                        placeholder="Select specialization"
-                    /> -->
-
                 </div>
             </div>
 
             <div class="card-footer d-flex justify-content-end gap-2" v-if="showSearch">
                 <button class="btn btn-secondary" @click="reset">Reset</button>
-                <button class="btn btn-primary d-flex justify-content-end" @click="filterApplication">Submit</button>
+                <button class="btn btn-primary d-flex justify-content-end" @click="filterApplication" :disabled="isFiltering">
+                    <span class="spinner-border spinner-border-sm mt-1 me-1" role="status" aria-hidden="true" v-if="isFiltering"></span>
+                    Submit
+                </button>
             </div>
         </div>
 
@@ -87,10 +75,14 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" :class="{ active: selectedStatus === 2 }" @click="selectedStatus = 2">Shortlisted</a>
+                    <a class="nav-link" :class="{ active: selectedStatus === 2 }" @click="selectedStatus = 2">
+                        Shortlisted <span class="badge bg-warning" v-if="countShortlistedApplication">{{countShortlistedApplication}}</span>
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" :class="{ active: selectedStatus === 3 }" @click="selectedStatus = 3">Interview Confirmed</a>
+                    <a class="nav-link" :class="{ active: selectedStatus === 3 }" @click="selectedStatus = 3">
+                        Interview Confirmed <span class="badge bg-warning" v-if="countInterviewConfirmedApplication">{{countInterviewConfirmedApplication}}</span>
+                    </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" :class="{ active: selectedStatus === -1 }" @click="selectedStatus = -1">Rejected</a>
@@ -101,7 +93,7 @@
                 <thead>
                     <tr>
                         <th scope="col">#</th>
-                        <th scope="col">Job Detail</th>
+                        <th scope="col" style="width: 240px;">Job Detail</th>
                         <th scope="col">Applicant Info</th>
                         <th scope="col" v-if="selectedStatus === 0 || selectedStatus === null">Resume</th>
                         <th scope="col">Status</th>
@@ -116,41 +108,35 @@
                     <tr v-else v-for="(application, index) in filteredApplications" :key="application.id">
                         <th scope="row">{{ index + 1 }}</th>
                         <td>
-                            <div class="d-flex align-items-center gap-1" v-if="application.job">
+                            <div class="d-flex flex-column" v-if="application.job">
                                 <span class="text-capitalize">{{ application.job.title }}</span>
                                 <span v-if="application.job.specialization_name">({{ application.job.specialization_name }})</span>
-                                <!-- class="badge bg-secondary"  -->
-                                <!-- <span v-if="application.job.company && application.job.company.state">- {{ application.job.company.state }}</span> -->
                             </div>
-
-                              <!-- {{ application.job.description }} -->
-                         
-                            <!-- <p>A ID: {{application.id}}</p>
-                          
-
-                            <p>JOB ID: {{application.job_id}}</p>
-                            <p>Work experience: {{application.job.required_experience_years}}</p>
-                            <p>Salary min {{application.job.salary_min}}</p> -->
+                           
+                            <div v-if="application.job" class="mt-2 d-flex flex-column gap-1">
+                                <div v-if="application.job.salary_min && application.job.salary_max">
+                                    Salary: RM{{application.job.salary_min}} - RM{{application.job.salary_max }}
+                                </div>
+                                <div>
+                                    Experience Year: {{application.job.required_experience_years > 0 ? application.job.required_experience_years : 'None'}}
+                                </div>
+                                <div class="text-capitalize" v-if="application.job.education_level">
+                                    Education Level: {{application.job.education_level}}
+                                </div>
+                            </div>
                         </td>
                         <td>
                             <div class="d-flex align-items-center gap-1 mb-1" v-if="application.applicant.email">
                                 {{ application.applicant.email }}
-                                <!-- <button class="btn btn-secondary btn-sm" @click="sendEmail(application.applicant.email)"><i class="fas fa-envelope"></i></button> -->
                             </div>
 
-                            <div class="d-flex align-items-center gap-1" v-if="application.applicant.contact_no">
+                            <div class="d-flex align-items-center gap-1 mb-1" v-if="application.applicant.contact_no">
                                 +{{ application.applicant.contact_no }}
-                                <!-- <button class="btn btn-secondary btn-sm ms-1" @click="call(application.applicant.contact_no)"><i class="fas fa-phone"></i></button> -->
                             </div>
-                            <!-- <div>
-                                Expected Salary: {{application.applicant.expected_salary}}
+
+                            <div class="d-flex align-items-center gap-1" v-if="application.applicant.expected_salary">
+                                Expected Salary: RM{{ application.applicant.expected_salary }}
                             </div>
-                            <div>
-                                Work experience: {{application.applicant.work_experience}}
-                            </div>
-                            <div>
-                                Specialization: {{application.applicant.specialization}}
-                            </div> -->
                         </td>
                         <td v-if="selectedStatus === 0 || selectedStatus === null">
                             <div class="d-flex align-items-center gap-1">
@@ -192,18 +178,17 @@
                                     <strong>Proposed:</strong>&nbsp;
                                     <span v-for="(slot,index) in application.interview_slots" :key="index" class="me-2">
                                         <span>{{ $moment(slot).format('YYYY MMM DD HH:mm A') }}</span>
-                                        <!-- <span v-if="$moment(slot).format('YYYY-MM-DD HH:mm:ss') === $moment(application.selected_slot).format('YYYY-MM-DD HH:mm:ss')" class="text-success ms-1">
-                                            <i class="fas fa-check-circle"></i>
-                                        </span> -->
                                         <span v-if="index < application.interview_slots.length - 1">, </span>
                                     </span>
+                                </div>
+                                <div v-else>
+                                    -
                                 </div>
 
                                 <!-- Selected Slot -->
                                 <div v-if="application.selected_slot" class="mb-1">
                                     <strong class="mb-2">Selected:</strong>&nbsp;
                                     <div class="d-flex align-items-center gap-2">
-                                        <!-- {{application.selected_slot}} -->
                                         <span>{{ $moment(application.selected_slot).format('YYYY MMM DD HH:mm A') }}</span>
                                         <button class="btn btn-sm btn-outline-success" v-if="application.interview_status !== 2" @click="confirmSchedule(application.id, application.selected_slot)" :disabled="isConfirm">
                                             <i class="fas fa-check me-1"></i>Confirm
@@ -238,7 +223,7 @@
                                     <i class="fas fa-check me-1" v-else></i>Match
                                 </button>
                              
-                                <button class="btn btn-primary" v-if="!application.interview_mode && ![0,-1].includes(application.status)" data-bs-toggle="modal" data-bs-target="#modal" @click="openSchedule(application.id)"><i class="fas fa-calendar-alt me-1"></i> Schedule Interview</button>
+                                <button class="btn btn-primary d-flex align-items-center" v-if="!application.interview_mode && ![0,-1].includes(application.status)" data-bs-toggle="modal" data-bs-target="#modal" @click="openSchedule(application.id)"><i class="fas fa-calendar-alt me-1"></i>Interview</button>
 
                                 <button class="btn btn-danger d-flex align-items-center" v-if="application.status != -1" @click="reject(application)" :disabled="loadingRejectedId === application.id">
                                     <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true" v-if="loadingRejectedId === application.id"></span>
@@ -345,6 +330,7 @@ export default {
         });
 
         const filterApplications = ref([]);
+        const isFiltering = ref(false);
 
         const getData = async () => {
             loading.value = true;
@@ -501,6 +487,10 @@ export default {
         };
 
         const filterApplication = async () => {
+            if (isFiltering.value) return;
+
+            isFiltering.value = true;
+
             filtered.value = true;
 
             try {
@@ -516,6 +506,8 @@ export default {
 
             } catch (error) {
                 console.error("There was an error filtering applications:", error);
+            } finally {
+                isFiltering.value = false;
             }
         };
 
@@ -574,6 +566,8 @@ export default {
 
         const countPendingApplication = countByStatus(0)
         const countMatchedApplication = countByStatus(1)
+        const countShortlistedApplication = countByStatus(2)
+        const countInterviewConfirmedApplication = countByStatus(3)
 
         return {
            applications,
@@ -602,7 +596,10 @@ export default {
            countMatchedApplication,
            showSearch,
            loadingId,
-           loadingRejectedId
+           loadingRejectedId,
+           countShortlistedApplication,
+           countInterviewConfirmedApplication,
+           isFiltering
         };
     }
 };

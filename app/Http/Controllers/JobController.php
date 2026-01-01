@@ -60,10 +60,10 @@ class JobController extends Controller
             'work_location' => 'nullable',
             'work_mode' => 'nullable',
             'employment_type' => 'nullable',
-            'required_experience_years' => 'nullable',
+            'required_experience_years' => 'required',
             'specialization' => 'nullable',
             'company_id' => 'required',
-            'education_level' => 'nullable|in:none,spm,diploma,bachelor,master,phd',
+            'education_level' => 'required|in:none,spm,diploma,bachelor,master,phd',
         ]);
 
         $validated['status'] = 1;
@@ -86,11 +86,11 @@ class JobController extends Controller
             'work_location' => 'nullable',
             'work_mode' => 'nullable',
             'employment_type' => 'nullable',
-            'required_experience_years' => 'nullable',
+            'required_experience_years' => 'required',
             'specialization' => 'nullable',
             'company_id' => 'required',
             'status' => 'nullable',
-            'education_level' => 'nullable|in:none,spm,diploma,bachelor,master,phd',
+            'education_level' => 'required|in:none,spm,diploma,bachelor,master,phd',
         ]);
 
         $validated['title'] = ucwords(strtolower($validated['title']));

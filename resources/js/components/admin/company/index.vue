@@ -66,7 +66,6 @@
                         <th scope="col">Company Detail</th>
                         <th scope="col">Location</th>
                         <th scope="col">Industry</th>
-                        <!-- <th scope="col">Country</th> -->
                         <th scope="col">Action</th>
                     </tr>
                 </thead>
@@ -87,9 +86,14 @@
                             </div>
                         </td>
                         <td>
+                            <div class="mb-2" v-if="company.address">
+                                Address: {{company.address}}
+                            </div>
+
                             <div v-if="company.state && company.city">
                                 {{ company.state }}, {{ company.city }}
                             </div>
+
                             {{ company.country_name }}
 
                             <div v-if="company.image_paths && company.image_paths.length" class="mt-2">

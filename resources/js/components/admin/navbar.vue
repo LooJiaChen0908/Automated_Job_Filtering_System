@@ -2,7 +2,7 @@
     <div>
         <nav class="navbar navbar-expand-lg navbar-light fixed-top bg-primary">
             <div class="container-fluid">
-                <a class="navbar-brand text-white" href="#">Admin System</a>
+                <a class="navbar-brand text-white" href="#">Automated Job Filtering System</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                     <span class="navbar-toggler-icon"></span>
                 </button>

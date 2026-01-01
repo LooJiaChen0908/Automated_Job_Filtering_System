@@ -2,7 +2,6 @@
      <div class="d-flex justify-content-center flex-column align-items-center" style="padding: 10rem;background-color: skyblue;"> 
        <h3 class="text-center mb-0">Welcome User!</h3>
         <div class="d-flex flex-column m-4 rounded-1 p-5 gap-3" style="background-color: white;">
-            <!-- my-2 mx-2 -->
             <h3 class="text-center">Login your account</h3>
 
             <div>

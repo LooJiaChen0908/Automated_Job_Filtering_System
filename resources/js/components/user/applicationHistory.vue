@@ -1,7 +1,5 @@
 <template>
     <div class="p-5" style="background-color: #bfbbbb;">
-        <!-- <h2>Application History</h2> -->
-
         <ul class="nav nav-tabs mb-3 custom-tabs">
             <li class="nav-item">
                 <router-link :to="{ name: 'ApplicationHistory', query: { type: 'saved' } }" class="nav-link" :class="{ active: currentTab === 'saved' }">

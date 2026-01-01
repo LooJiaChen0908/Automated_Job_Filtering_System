@@ -181,6 +181,19 @@ export default {
             { id: 'CN', name: 'China' }
         ]);
 
+        // const industries = ref([
+        //     { label: 'Information Technology (IT)', value: 'it' },
+        //     { label: 'Finance & Banking', value: 'finance' },
+        //     { label: 'Education & Training', value: 'education' },
+        //     { label: 'Healthcare & Medical', value: 'healthcare' },
+        //     { label: 'Manufacturing', value: 'manufacturing' },
+        //     { label: 'Retail & Consumer Goods', value: 'retail' },
+        //     { label: 'Food & Beverage', value: 'food_beverage' },
+        //     { label: 'Tourism & Hospitality', value: 'tourism' },
+        //     { label: 'Construction & Real Estate', value: 'construction' },
+        //     { label: 'Transportation & Logistics', value: 'logistics' },
+        // ]);
+
         const industries = ref([
             { label: 'Information Technology (IT)', value: 'it' },
             { label: 'Finance & Banking', value: 'finance' },
@@ -192,6 +205,16 @@ export default {
             { label: 'Tourism & Hospitality', value: 'tourism' },
             { label: 'Construction & Real Estate', value: 'construction' },
             { label: 'Transportation & Logistics', value: 'logistics' },
+            { label: 'Arts, Media & Graphic Design', value: 'arts_media' },
+            { label: 'Telecommunications', value: 'telecom' },
+            { label: 'Energy & Utilities', value: 'energy' },
+            { label: 'Agriculture & Farming', value: 'agriculture' },
+            { label: 'Legal Services', value: 'legal' },
+            { label: 'Government & Public Sector', value: 'government' },
+            { label: 'Non-Profit & NGOs', value: 'nonprofit' },
+            { label: 'Sports & Recreation', value: 'sports' },
+            { label: 'Entertainment & Performing Arts', value: 'entertainment' },
+            { label: 'Environmental & Sustainability', value: 'environment' },
         ]);
 
         const fetchCompany = async () => {

@@ -81,7 +81,7 @@
                                     {{user.email}}
                                     <button class="btn btn-secondary btn-sm ms-1" @click="copyToClipboard(user.email, index, 'email')"> <i :class="copyIcon(index, 'email')"></i></button>
                                 </div>
-                                <div>
+                                <div v-if="user.contact_no">
                                     +{{user.contact_no}}
                                     <button class="btn btn-secondary btn-sm ms-1" @click="copyToClipboard(user.contact_no, index, 'contact_no')"> <i :class="copyIcon(index, 'contact_no')"></i></button>
                                 </div>
@@ -91,7 +91,12 @@
                             {{user.specialization_name ?? '-'}}
                         </td>
                         <td>
-                            RM{{user.expected_salary}}
+                            <div v-if="user.expected_salary">
+                                RM{{user.expected_salary}}
+                            </div>
+                            <div v-else>
+                                -
+                            </div>
                         </td>
                         <td>
                             <div v-if="user.work_experience">
