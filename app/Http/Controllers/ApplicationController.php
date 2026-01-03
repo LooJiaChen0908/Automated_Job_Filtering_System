@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Mail;
 
 use Smalot\PdfParser\Parser;
 use App\Services\ResumeParserService;
+use Illuminate\Support\Str;
 
 class ApplicationController extends Controller
 {
@@ -28,8 +29,6 @@ class ApplicationController extends Controller
             ])
             ->latest()
             ->get();        
-
-        // how to with count with applicant number which shown how much applicant apply with it?
 
         $specializations = collect(JobPosting::$specializations)
         ->map(function ($value, $key) {
@@ -49,8 +48,6 @@ class ApplicationController extends Controller
 
     public function filter(Request $request)
     {
-        $is_specify_specialization = false;
-
         $applications = Application::with('job', 'applicant', 'job.company')->get();
 
         $filtered = $applications->filter(function ($a) use ($request) {
@@ -65,6 +62,7 @@ class ApplicationController extends Controller
             $parser = new ResumeParserService();
             $parsed = $parser->parse($resumePath);
 
+            // check
             // Experience check (from resume parsing)
             if ($request->check_experience) {
                 $required = (int) ($job->required_experience_years ?? 0);
@@ -76,18 +74,39 @@ class ApplicationController extends Controller
             }
 
             // Specialization check (from resume parsing)
-            if ($request->check_specialization) {
-                $jobSpec = strtolower(trim($job->specialization ?? ''));
-                $resumeSpecs = array_map('strtolower', $parsed['specializations'] ?? []);
+            // if ($request->check_specialization) {
+            //     $jobSpec = strtolower(trim($job->specialization ?? ''));
+            //     $resumeSpecs = array_map('strtolower', $parsed['specializations'] ?? []);
 
-                if (!in_array($jobSpec, $resumeSpecs)) {
+            //     if (!in_array($jobSpec, $resumeSpecs)) {
+            //         return false;
+            //     }
+            // }
+
+            if ($request->check_specialization) {
+                // Normalize job specialization
+                $jobSpec = strtolower(str_replace('-', ' ', trim($job->specialization ?? '')));
+                
+                // Normalize resume specializations
+                $resumeSpecs = array_map(function ($spec) {
+                    return strtolower(str_replace('-', ' ', trim($spec)));
+                }, $parsed['specializations'] ?? []);
+
+                // Check for match
+                $matched = collect($resumeSpecs)->contains(function ($spec) use ($jobSpec) {
+                    return $spec === $jobSpec 
+                        || Str::contains($spec, $jobSpec) 
+                        || Str::contains($jobSpec, $spec);
+                });
+
+                if (!$matched) {
                     return false;
                 }
             }
 
             // Education level check (from resume parsing)
             if ($request->check_education) {
-               $requiredLevel = strtolower($job->education_level ?? 'none');
+                $requiredLevel = strtolower($job->education_level ?? 'none');
                 $resumeLevel   = strtolower($parsed['education_level'] ?? 'none');
 
                 // applicant must have >= required level
@@ -96,34 +115,15 @@ class ApplicationController extends Controller
                 }
             }
 
-            // previous code
-
-            if ($request->check_salary) { // between the range salary_min & salary_max
+            if ($request->check_salary) {
                 $expected = (int) ($applicant->expected_salary ?? 0);
-                $minimum = (int) ($job->salary_min ?? 0);
+                $min = (int) ($job->salary_min ?? 0);
+                $max = (int) ($job->salary_max ?? PHP_INT_MAX);
 
-                if ($expected > $minimum) {
+                if ($expected < $min || $expected > $max) {
                     return false;
                 }
             }
-
-            // if ($request->check_experience) {
-            //     $required = (int) ($job->required_experience_years ?? 0);
-            //     $actual = (int) ($applicant->work_experience ?? 0);
-
-            //     if ($actual < $required) {
-            //         return false;
-            //     }
-            // }
-
-            // if ($request->check_specialization) {
-            //     $jobSpec = strtolower(trim($job->specialization ?? ''));
-            //     $appSpec = strtolower(trim($applicant->specialization ?? ''));
-
-            //     if ($jobSpec !== $appSpec) {
-            //         return false;
-            //     }
-            // }
 
             return true;
         });
@@ -132,30 +132,6 @@ class ApplicationController extends Controller
             'success' => true,
             'filterApplications' => $filtered->values(),
         ]);
-
-        // $application = Application::with('job','applicant')->findOrFail(1);
-        // $job = $application->job;
-        // $applicant = $application->applicant;
-
-        // $matches = true;
-
-        // if ($job->salary_min && $applicant->expected_salary) {
-        //     if ((int)$applicant->expected_salary < (int)$job->salary_min) {
-        //         $matches = false;
-        //     }
-        // }
-
-        // if ($job->required_experience_years && $applicant->work_experience) {
-        //     if ((int)$applicant->work_experience < (int)$job->required_experience_years) {
-        //         $matches = false;
-        //     }
-        // }
-
-        // if ($job->specialization && $applicant->specialization) {
-        //     if ($applicant->specialization != $job->specialization) {
-        //         $matches = false;
-        //     }
-        // }
 
         // Optional: send notification or email
         // Notification::send($applicant->user, new ApplicationFiltered($application));
@@ -202,7 +178,7 @@ class ApplicationController extends Controller
 
         $validated = $request->validate([
             'interview_mode'  => 'required|in:online,f2f',
-            'interview_slots' => 'required|array|min:1|max:3', // up to 3 slots
+            'interview_slots' => 'required|array|min:3|max:3', // up to 3 slots
             'interview_slots.*' => 'date' // each slot must be a valid date
         ]);
 
