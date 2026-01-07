@@ -305,7 +305,7 @@ export default {
                         confirmButtonText: 'Ok'
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            router.back();
+                            // router.back();
                         }
                     });
                 }

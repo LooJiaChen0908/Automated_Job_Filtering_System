@@ -24,7 +24,7 @@ class ZoomController extends Controller
         try {
             $response = $zoom->createMeeting([
                 'type'       => 2,
-                'duration'   => 60,
+                'duration'   => 30,
                 'timezone'   => 'Asia/Kuala_Lumpur',
                 'topic'      => $validated['topic'],
                 'start_time' => Carbon::parse($application->confirmed_slot)->format('Y-m-d\TH:i:s'),
@@ -58,10 +58,6 @@ class ZoomController extends Controller
      
         return response()->json([
             'success' => true,
-            // 'meeting_id' => $data['id'],
-            // 'topic'      => $data['topic'],
-            // 'start_time' => $data['start_time'],
-            // 'join_url'   => $data['join_url'],
         ], 201);
     }
 

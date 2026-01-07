@@ -305,6 +305,31 @@ class ApplicantController extends Controller
             'suggested_slots.*' => 'date' // each slot must be a valid date
         ]);
 
+        if ($validated['suggested_slots']) {
+            $slots = collect($validated['suggested_slots'])
+                ->map(fn($slot) => Carbon::parse($slot)->setTimezone('Asia/Kuala_Lumpur'))
+                ->sort();
+
+            // Check duplicates (same date + time)
+            if ($slots->count() !== $slots->unique(fn($s) => $s->format('Y-m-d H:i:s'))->count()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Duplicate interview slots are not allowed.'
+                ], 422);
+            }
+
+            // Check spacing (minimum 30 minutes apart)
+            for ($i = 1; $i < $slots->count(); $i++) {
+                $diffMinutes = $slots[$i-1]->diffInMinutes($slots[$i]);
+                if ($diffMinutes < 30) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Suggested slots must be at least 30 minutes apart.'
+                    ], 422);
+                }
+            }
+        }
+
         $application = Application::where('applicant_id', $user->applicant->id)->findOrFail($id);
 
         $slots = collect($validated['suggested_slots'])

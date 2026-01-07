@@ -197,7 +197,7 @@
                                 </div>
 
                                 <!-- Suggested Slots -->
-                                <div v-if="application.suggested_slots && application.suggested_slots.length" class="mb-1">
+                                <div v-if="application.suggested_slots && application.suggested_slots.length && application.status != -1" class="mb-1">
                                     <strong class="mb-2">Suggested:</strong>
                                     <div class="d-flex align-items-center gap-2 mb-2" v-for="(slot,index) in application.suggested_slots" :key="index">
                                         <span>{{ $moment(slot).format('YYYY MMM DD HH:mm A') }}</span>
@@ -405,6 +405,15 @@ export default {
                     Object.keys(validationErrors).forEach(key => delete validationErrors[key]);
                     // Assign new errors
                     Object.assign(validationErrors, error.response.data.errors);
+
+                    if (error.response?.data?.code) {
+                        Swal.fire({
+                            title: 'Update schedule failed!',
+                            text: error.response?.data?.message || 'Something went wrong',
+                            icon: 'error'
+                        });
+                    }
+
                 } else {
                     Swal.fire({
                         title: 'Update schedule failed!',
