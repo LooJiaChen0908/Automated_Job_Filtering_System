@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div class="d-flex align-items-center justify-content-between mb-5">
+        <div class="d-flex align-items-center justify-content-between mb-2">
             <h2>Job List</h2>
 
             <router-link to="/admin/job/create" class="btn btn-primary">
