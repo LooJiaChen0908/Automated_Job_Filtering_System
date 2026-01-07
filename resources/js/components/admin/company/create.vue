@@ -131,6 +131,16 @@ export default {
             { label: 'Tourism & Hospitality', value: 'tourism' },
             { label: 'Construction & Real Estate', value: 'construction' },
             { label: 'Transportation & Logistics', value: 'logistics' },
+            { label: 'Arts, Media & Graphic Design', value: 'arts_media' },
+            { label: 'Telecommunications', value: 'telecom' },
+            { label: 'Energy & Utilities', value: 'energy' },
+            { label: 'Agriculture & Farming', value: 'agriculture' },
+            { label: 'Legal Services', value: 'legal' },
+            { label: 'Government & Public Sector', value: 'government' },
+            { label: 'Non-Profit & NGOs', value: 'nonprofit' },
+            { label: 'Sports & Recreation', value: 'sports' },
+            { label: 'Entertainment & Performing Arts', value: 'entertainment' },
+            { label: 'Environmental & Sustainability', value: 'environment' },
         ]);
 
         const states = ref([
